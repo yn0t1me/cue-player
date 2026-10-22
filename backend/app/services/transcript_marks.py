@@ -21,10 +21,6 @@ def _ready_video(session: Session, video_id: str) -> Video:
     return video
 
 
-def _optional_note(note: str | None) -> str | None:
-    return note if note and note.strip() else None
-
-
 def _response(mark: TranscriptMark, segment: LearningTranscriptSegment,
               revision: TranscriptRevision, current_revision_id: str) -> TranscriptMarkResponse:
     return TranscriptMarkResponse(
@@ -35,7 +31,7 @@ def _response(mark: TranscriptMark, segment: LearningTranscriptSegment,
         segment_start=segment.start_seconds, segment_end=segment.end_seconds,
         segment_text=segment.text, start_offset=mark.start_offset,
         end_offset=mark.end_offset, selected_text=mark.selected_text,
-        note=mark.note, created_at=mark.created_at, updated_at=mark.updated_at,
+        created_at=mark.created_at, updated_at=mark.updated_at,
     )
 
 
@@ -119,18 +115,13 @@ def create_mark(session_factory: sessionmaker[Session], video_id: str,
 
 def get_or_create_mark(session: Session, video_id: str,
                        payload: CreateTranscriptMarkRequest) -> tuple[TranscriptMark, bool]:
-    """Persist a validated anchor inside the caller's locked transaction.
-
-    Question answers can refer to old revisions; current-revision validation belongs
-    to the user-facing create endpoint, not this shared persistence operation.
-    """
+    """Persist a validated selection inside the caller's locked transaction."""
     key_id = (video_id, payload.revision_id, payload.segment_id,
               payload.start_offset, payload.end_offset)
     key = session.get(TranscriptMarkKey, key_id)
     if key is not None:
         return session.get(TranscriptMark, key.mark_id), False
     values = payload.model_dump()
-    values['note'] = _optional_note(payload.note)
     mark = TranscriptMark(video_id=video_id, **values)
     session.add(mark)
     session.flush()
@@ -138,16 +129,6 @@ def get_or_create_mark(session: Session, video_id: str,
         video_id=video_id, revision_id=payload.revision_id, segment_id=payload.segment_id,
         start_offset=payload.start_offset, end_offset=payload.end_offset, mark_id=mark.id))
     return mark, True
-
-
-def update_mark_note(session: Session, video_id: str, mark_id: str,
-                     note: str | None) -> TranscriptMarkResponse:
-    lock_video(session, video_id)
-    video = _ready_video(session, video_id)
-    mark, segment, revision = _mark_with_context(session, video_id, mark_id)
-    mark.note = _optional_note(note)
-    session.commit()
-    return _response(mark, segment, revision, video.current_revision_id)
 
 
 def delete_mark(session: Session, video_id: str, mark_id: str) -> None:
@@ -167,7 +148,7 @@ def delete_mark(session: Session, video_id: str, mark_id: str) -> None:
             TranscriptMark.id != mark.id)).all()
         if candidates:
             chosen = min(candidates, key=lambda item: (
-                not bool(item.note and item.note.strip()), item.created_at, item.id))
+                item.created_at, item.id))
             key.mark_id = chosen.id
         else:
             session.delete(key)

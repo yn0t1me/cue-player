@@ -1,6 +1,6 @@
 # Current Product Specifications
 
-Updated: 2026-10-21. Scope: currently implemented product behavior, vocabulary and explicit boundaries. These specs consolidate later product decisions and current implementation; they do not introduce new features.
+Updated: 2026-10-22. Scope: currently implemented product behavior, vocabulary and explicit boundaries. These specs consolidate later product decisions and current implementation; they do not introduce new features.
 
 ## Read Before Changing Behavior
 
@@ -12,7 +12,7 @@ Updated: 2026-10-21. Scope: currently implemented product behavior, vocabulary a
 | Import, collections, batches and explicit retry | [Import and collections](import-and-collections.md) |
 | Sources, external processing, translation and version publication | [Subtitle workflow](subtitle-workflow.md) |
 | Reader tabs, playback, selection, overlay and fullscreen behavior | [Reading experience](reading-experience.md) |
-| Favorites, questions, answers, relations and content output | [Notes and output](notes-and-output.md) |
+| Expression favorites and separate Agent material exports | [Favorites and output](notes-and-output.md) |
 
 3. For implementation, also read the [frontend](../frontend/index.md) or [backend](../backend/index.md) engineering index. Detailed technical contracts live in [technical specs](../contracts/index.md).
 

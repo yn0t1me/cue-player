@@ -1,6 +1,6 @@
 # HTTP API
 
-Scope: current application routes and shared wire behavior, extracted 2026-10-21. Engineering baseline, verified by source inspection. All paths below include the /api prefix registered in `backend/app/main.py`.
+Scope: current application routes and shared wire behavior, updated 2026-10-22. Engineering baseline, verified by source inspection. All paths below include the /api prefix registered in `backend/app/main.py`.
 
 ## Shared Shapes
 
@@ -42,22 +42,17 @@ The table is a source snapshot, checked against route definitions rather than a 
 | `GET /api/videos/{video_id}/transcript/chunk-layout` | 200 | ChunkLayoutStateResponse |
 | `GET /api/videos/{video_id}/marks` | 200 | TranscriptMarkListResponse |
 | `POST /api/videos/{video_id}/marks` | 201 / 200 | TranscriptMarkResponse |
-| `PATCH /api/videos/{video_id}/marks/{mark_id}` | 200 | TranscriptMarkResponse |
 | `DELETE /api/videos/{video_id}/marks/{mark_id}` | 204 | empty (204) |
 | `GET /api/videos/{video_id}/transcript/learning-source` | 200 | learning-source-v2 |
 | `POST /api/videos/{video_id}/transcript/source-learning/preview` | 200 | SourceLearningPreviewResponse |
 | `POST /api/videos/{video_id}/transcript/source-learning` | 200 | LearningPublishResponse |
 | `GET /api/videos/{video_id}/transcript/learning-export.srt` | 200 | English SRT |
-| `GET /api/videos/{video_id}/questions` | 200 | TranscriptQuestionListResponse |
-| `POST /api/videos/{video_id}/questions` | 201 | TranscriptQuestionResponse |
-| `PATCH /api/videos/{video_id}/questions/{question_id}` | 200 | TranscriptQuestionResponse |
-| `DELETE /api/videos/{video_id}/questions/{question_id}` | 204 | empty (204) |
 
 ## Errors and Specialized Requests
 
 Expected AppError uses {error:{code,message}}; request validation becomes 422 VALIDATION_ERROR without echoing user content. Unknown routes and method mismatches keep framework behavior; there is no universal custom envelope for all infrastructure/unhandled 500s. See `backend/app/core/errors.py` and `backend/app/schemas/errors.py`.
 
-- Note/question bodies, limits, statuses: [notes](notes-and-anchors.md).
+- Favorite selection bodies, limits and statuses: [anchors](notes-and-anchors.md).
 - Collection/preview/batch bodies and statuses: [collections](collections-and-batches.md).
 - Single/batch retry requests, accepted snapshots, per-item conflict behavior: [processing](processing-and-retries.md).
 - Source copy/preview/publish bodies, result format, validation codes: [source exchange](source-exchange.md), [publication](publication.md).
@@ -65,6 +60,8 @@ Expected AppError uses {error:{code,message}}; request validation becomes 422 VA
 Health is only {status:"ok"}; it checks neither persistence nor YouTube. Raw and current-learning exports are English SRT downloads with attachment names; the first reads Raw, the second current learning text. Exact export formatting lives in `backend/app/services/srt_export.py` and source_learning.py; no bilingual SRT endpoint exists.
 
 ## Retired Routes
+
+Question GET/POST/PATCH/DELETE routes and favorite-note PATCH are removed. Favorite create accepts only the selection and responses contain no note. Agent material copy/Markdown is frontend-only and adds no endpoint.
 
 Legacy transcript import/learning-import/chunk-layout POST preview/writes and normalization GET/POST/batch-retry routes do not exist. Missing routes return 404; POST to the retained chunk-layout GET path returns 405. Do not restore NORMALIZATION_DISABLED responses or accept JSON v1 results. Failure-import retry is the current retry route, separate from retired cloud-batch retry. Source-switch transcript/reprocess is not implemented.
 

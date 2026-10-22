@@ -8,7 +8,6 @@ import type {
   LearningTranscriptPublishResult,
   Transcript,
   TranscriptMark,
-  TranscriptQuestion,
   TranscriptRevision,
   Video, SubtitlePreference,
 } from '../types/video';
@@ -36,43 +35,13 @@ export async function getTranscriptMarks(
     `/videos/${encodeURIComponent(id)}/marks`, { signal })).data;
 }
 
-export async function getTranscriptQuestions(
-  id: string, signal?: AbortSignal,
-): Promise<{ items: TranscriptQuestion[] }> {
-  return (await api.get<{ items: TranscriptQuestion[] }>(
-    `/videos/${encodeURIComponent(id)}/questions`, { signal })).data;
-}
-
 export async function createTranscriptFavorite(id: string, payload: CreateTranscriptMark) {
   const response = await api.post<TranscriptMark>(`/videos/${encodeURIComponent(id)}/marks`, payload);
   return { item: response.data, created: response.status === 201 };
 }
 
-export async function createTranscriptQuestion(id: string, anchor: CreateTranscriptMark,
-  question: string, answer: string | null): Promise<TranscriptQuestion> {
-  return (await api.post<TranscriptQuestion>(`/videos/${encodeURIComponent(id)}/questions`,
-    { ...anchor, question, answer })).data;
-}
-
-export async function updateTranscriptQuestion(id: string, questionId: string,
-  patch: { question?: string; answer?: string | null }): Promise<TranscriptQuestion> {
-  return (await api.patch<TranscriptQuestion>(
-    `/videos/${encodeURIComponent(id)}/questions/${encodeURIComponent(questionId)}`, patch)).data;
-}
-
-export async function updateTranscriptMarkNote(
-  id: string, markId: string, note: string | null,
-): Promise<TranscriptMark> {
-  return (await api.patch<TranscriptMark>(
-    `/videos/${encodeURIComponent(id)}/marks/${encodeURIComponent(markId)}`, { note })).data;
-}
-
 export async function deleteTranscriptMark(id: string, markId: string): Promise<void> {
   await api.delete(`/videos/${encodeURIComponent(id)}/marks/${encodeURIComponent(markId)}`);
-}
-
-export async function deleteTranscriptQuestion(id: string, questionId: string): Promise<void> {
-  await api.delete(`/videos/${encodeURIComponent(id)}/questions/${encodeURIComponent(questionId)}`);
 }
 
 export async function getRawSrt(id: string): Promise<string> {

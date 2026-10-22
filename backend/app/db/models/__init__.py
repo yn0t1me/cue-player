@@ -13,7 +13,6 @@ from app.db.models.transcript_chunk_layout import (
     TranscriptChunkSegment,
 )
 
-from app.db.models.transcript_question import TranscriptQuestion
 from app.db.models.transcript_mark_key import TranscriptMarkKey
 
 __all__ = [
@@ -25,7 +24,6 @@ __all__ = [
     'TranscriptNormalizationRun',
     'TranscriptRevision',
     'TranscriptMark',
-    'TranscriptQuestion',
     'TranscriptMarkKey',
     'TranscriptChunkLayout',
     'TranscriptChunkSegment',

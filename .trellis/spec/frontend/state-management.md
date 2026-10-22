@@ -10,6 +10,6 @@ Applies to frontend persistence and UI state; extracted 2026-10-21.
 
 ## Keys and refresh
 
-Include the resource identity and relevant version in query keys. Current examples are `['video', id]`, `['transcript', id]` and `['chunk-layout', id, revision_id]` in VideoPage. Invalidate related cache families after a mutation; collection changes use `refreshLibrary` in `frontend/src/features/collections/shared.ts`, while notes refresh marks/questions in VideoPage.
+Include the resource identity and relevant version in query keys. Current examples are `['video', id]`, `['transcript', id]` and `['chunk-layout', id, revision_id]` in VideoPage. Invalidate related cache families after a mutation; collection changes use `refreshLibrary` in `frontend/src/features/collections/shared.ts`, while favorite writes refresh marks in VideoPage; publication also refreshes current transcript/layout and historical favorite context.
 
 Processing polling is conditional: `features/video/ProcessingState.tsx` owns videoRefreshInterval; `pages/ImportBatchPage.tsx` polls while waiting/running items exist. Avoid permanent polling for terminal states or a second local copy of the same server result. Existing components may coordinate several queries; adding Redux/Zustand is not part of this baseline.

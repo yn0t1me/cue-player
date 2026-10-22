@@ -29,7 +29,7 @@ afterEach(async () => {
   vi.clearAllMocks();
 });
 
-it('identifies the M0.4 reader and explains the complete source fallback', async () => {
+it('identifies the player and expression collector and explains the complete source fallback', async () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   await act(async () => root.render(
     <QueryClientProvider client={queryClient}>
@@ -38,7 +38,7 @@ it('identifies the M0.4 reader and explains the complete source fallback', async
   ));
 
   await vi.waitFor(() => expect(container.textContent).toContain('从一个想看懂的视频开始'));
-  expect(container.querySelector('.edition')?.textContent).toBe('M0.4 · 英文字幕读器');
+  expect(container.querySelector('.edition')?.textContent).toBe('视频播放 · 表达收藏');
   expect(container.querySelector('#import-hint')?.textContent).toContain('都没有时在本机进行语音转写');
   queryClient.clear();
 });

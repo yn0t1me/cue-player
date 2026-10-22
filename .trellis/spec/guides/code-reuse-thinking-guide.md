@@ -7,7 +7,7 @@ Applies to project code and documentation. Search the relevant source/spec befor
 | Need | Existing owner |
 |---|---|
 | HTTP transport and safe API errors | `frontend/src/api/client.ts` |
-| Selection identity / question relations | `frontend/src/features/transcript/noteRelations.ts` |
+| Exact English selection and Unicode offsets | `frontend/src/features/transcript/markText.ts` |
 | Copy and Markdown content grouping | `frontend/src/features/transcript/collectionOutput.ts` |
 | Actual-time active subtitle lookup | `frontend/src/features/transcript/findActiveSegmentIndex.ts` |
 | Library query invalidation and intent keys | `frontend/src/features/collections/shared.ts` |

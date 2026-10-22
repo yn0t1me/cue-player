@@ -2,8 +2,8 @@ import { afterEach, expect, it } from 'vitest';
 import { AxiosError } from 'axios';
 import { api, ApiError } from './client';
 import {
-  createTranscriptFavorite, createTranscriptQuestion, updateTranscriptQuestion,
-  deleteTranscriptMark, deleteTranscriptQuestion,
+  createTranscriptFavorite,
+  deleteTranscriptMark,
   getRawSrt, getLearningSource, getLearningSrt, previewSourceLearning, publishSourceLearning,
   getTranscriptRevisions,
   getTranscriptRevision,
@@ -11,7 +11,6 @@ import {
   getTranscriptMarks,
   getVideos,
   importVideo,
-  updateTranscriptMarkNote,
 } from './videos';
 
 const originalAdapter = api.defaults.adapter;
@@ -55,7 +54,7 @@ it('retains read-only historical versions', async () => {
   ]);
 });
 
-it('uses video-scoped mark endpoints and only sends a note when editing', async () => {
+it('uses video-scoped favorite endpoints with selection-only writes', async () => {
   const requests: Array<{ method?: string; url?: string; data?: unknown }> = [];
   api.defaults.adapter = async config => {
     requests.push({ method: config.method, url: config.url,
@@ -64,17 +63,14 @@ it('uses video-scoped mark endpoints and only sends a note when editing', async 
   };
   await getTranscriptMarks('video/id');
   await createTranscriptFavorite('video/id', { revision_id: 'r', segment_id: 's',
-    start_offset: 0, end_offset: 5, selected_text: 'Hello', note: null });
-  await updateTranscriptMarkNote('video/id', 'mark/id', 'Personal note');
+    start_offset: 0, end_offset: 5, selected_text: 'Hello' });
   await deleteTranscriptMark('video/id', 'mark/id');
   expect(requests).toEqual([
     { method: 'get', url: '/videos/video%2Fid/marks', data: undefined },
     { method: 'post', url: '/videos/video%2Fid/marks', data: {
       revision_id: 'r', segment_id: 's', start_offset: 0, end_offset: 5,
-      selected_text: 'Hello', note: null,
+      selected_text: 'Hello',
     } },
-    { method: 'patch', url: '/videos/video%2Fid/marks/mark%2Fid',
-      data: { note: 'Personal note' } },
     { method: 'delete', url: '/videos/video%2Fid/marks/mark%2Fid', data: undefined },
   ]);
 });
@@ -129,34 +125,6 @@ it.each([200, 201])('distinguishes duplicate and created favorites by HTTP statu
   await expect(createTranscriptFavorite('video/id', { revision_id: 'r', segment_id: 's',
     start_offset: 0, end_offset: 1, selected_text: 'A' })).resolves.toEqual({ item, created: status === 201 });
 });
-
-it('sends manual question anchors and answer-only patches without changing the question', async () => {
-  const requests: Array<{ url?: string; method?: string; data: unknown }> = [];
-  api.defaults.adapter = async config => {
-    requests.push({ url: config.url, method: config.method, data: JSON.parse(config.data) });
-    return { data: { id: 'q' }, status: 201, statusText: 'OK', headers: {}, config };
-  };
-  await createTranscriptQuestion('video/id', { revision_id: 'r', segment_id: 's',
-    start_offset: 1, end_offset: 2, selected_text: '😀' }, 'Why?', 'Manual');
-  await updateTranscriptQuestion('video/id', 'q/id', { answer: null });
-  expect(requests).toEqual([
-    { url: '/videos/video%2Fid/questions', method: 'post', data: { revision_id: 'r', segment_id: 's',
-      start_offset: 1, end_offset: 2, selected_text: '😀', question: 'Why?', answer: 'Manual' } },
-    { url: '/videos/video%2Fid/questions/q%2Fid', method: 'patch', data: { answer: null } },
-  ]);
-});
-
-
-it('deletes only the selected question using encoded video and record identifiers', async () => {
-  let request: { url?: string; method?: string } | undefined;
-  api.defaults.adapter = async config => {
-    request = { url: config.url, method: config.method };
-    return { data: null, status: 204, statusText: 'No Content', headers: {}, config };
-  };
-  await deleteTranscriptQuestion('video/id', 'question/id');
-  expect(request).toEqual({ url: '/videos/video%2Fid/questions/question%2Fid', method: 'delete' });
-});
-
 
 it.each(['manual_first', 'auto_only'] as const)('persists the selected import preference %s', async preference => {
   let data: unknown;

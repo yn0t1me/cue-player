@@ -63,14 +63,8 @@ export interface TranscriptMark {
   start_offset: number;
   end_offset: number;
   selected_text: string;
-  note: string | null;
   created_at: string;
   updated_at: string;
-}
-
-export interface TranscriptQuestion extends Omit<TranscriptMark, 'note'> {
-  question: string;
-  answer: string | null;
 }
 
 export interface CreateTranscriptMark {
@@ -79,7 +73,6 @@ export interface CreateTranscriptMark {
   start_offset: number;
   end_offset: number;
   selected_text: string;
-  note?: string | null;
 }
 
 export interface LearningCandidateSegment {

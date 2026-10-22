@@ -8,7 +8,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <header><Link className="wordmark" to="/">Context English<span aria-hidden="true">.</span></Link>
-        <span className="edition">M0.4 · 英文字幕读器</span></header>
+        <span className="edition">视频播放 · 表达收藏</span></header>
       <main><Routes>
         <Route path="/" element={<LibraryPage />} />
         <Route path="/collections/:id" element={<CollectionPage />} />
@@ -17,7 +17,7 @@ export default function App() {
         <Route path="/videos/:id/marks" element={<VideoPage initialTab="favorites" />} />
         <Route path="*" element={<><h1 className="detail-title">页面不存在</h1><Link className="back-link" to="/">返回视频库</Link></>} />
       </Routes></main>
-      <footer><span>Context before memorization.</span><span>本地学习空间</span></footer>
+      <footer><span>Context before memorization.</span><span>本地视频素材库</span></footer>
     </div>
   );
 }

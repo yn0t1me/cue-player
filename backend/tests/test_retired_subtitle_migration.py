@@ -40,7 +40,7 @@ def test_upgrade_refuses_legacy_rows_before_any_changes(tmp_path, monkeypatch, l
                     VALUES ('s','v','r',0,'Old',0,1,'cue','{}',4)"""))
     before = snapshot(engine)
     with pytest.raises(RuntimeError, match='remove retired subtitle records'):
-        command.upgrade(config, 'head')
+        command.upgrade(config, '014_retire_legacy_subtitles')
     assert snapshot(engine) == before
     engine.dispose()
 
@@ -66,8 +66,7 @@ def test_populated_upgrade_and_downgrade_preserve_all_current_children(tmp_path,
         for statement in statements:
             connection.execute(text(statement))
     before = snapshot(engine)
-    command.upgrade(config, 'head')
-    command.check(config)
+    command.upgrade(config, '014_retire_legacy_subtitles')
     after = snapshot(engine)
     for table, rows in before.items():
         if table in ('alembic_version','transcript_normalization_runs','transcript_corrections','transcript_normalization_batches'):

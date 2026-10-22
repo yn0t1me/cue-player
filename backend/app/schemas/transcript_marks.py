@@ -14,13 +14,7 @@ class TranscriptSelectionRequest(BaseModel):
 
 
 class CreateTranscriptMarkRequest(TranscriptSelectionRequest):
-    note: str | None = Field(default=None, max_length=10_000)
-
-
-class UpdateTranscriptMarkRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True)
-
-    note: str | None = Field(max_length=10_000)
+    pass
 
 
 class TranscriptAnchorResponse(BaseModel):
@@ -43,7 +37,7 @@ class TranscriptAnchorResponse(BaseModel):
 
 
 class TranscriptMarkResponse(TranscriptAnchorResponse):
-    note: str | None
+    pass
 
 
 class TranscriptMarkListResponse(BaseModel):

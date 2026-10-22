@@ -9,7 +9,7 @@ Before implementation, identify the authoritative product behavior, request/resp
 Examples to inspect:
 
 - Subtitle publication: `frontend/src/features/transcript/LearningTranscriptImportPanel.tsx` -> `frontend/src/api/videos.ts` -> `backend/app/api/routes/videos.py` -> `backend/app/services/source_learning.py`; [publication contract](../contracts/publication.md) owns digest/transaction semantics.
-- First saved answer: `backend/app/services/transcript_questions.py` -> canonical favorite in transcript_marks.py -> refreshed question/favorite queries in `frontend/src/pages/VideoPage.tsx`; [anchor contract](../contracts/notes-and-anchors.md) owns the one-time event.
+- Favorite selection: `frontend/src/features/transcript/markText.ts` -> API client -> `backend/app/services/transcript_marks.py` -> persisted favorite/key -> refreshed favorites query and separate material output; [anchor contract](../contracts/notes-and-anchors.md) owns identity and concurrency.
 - Retry: `frontend/src/features/collections/RetryVideoButton.tsx` -> `backend/app/services/import_retries.py` -> serial scheduler; [processing contract](../contracts/processing-and-retries.md) distinguishes accepted snapshots from current progress.
 
 ## Review Questions

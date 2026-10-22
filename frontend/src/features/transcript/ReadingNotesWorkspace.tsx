@@ -1,10 +1,9 @@
 import { useRef, type ReactNode } from 'react';
 
-export type ReadingTab = 'transcript' | 'favorites' | 'questions';
+export type ReadingTab = 'transcript' | 'favorites';
 const tabs: Array<{ id: ReadingTab; label: string }> = [
   { id: 'transcript', label: '字幕' },
-  { id: 'favorites', label: '我的收藏' },
-  { id: 'questions', label: '我的提问' },
+  { id: 'favorites', label: '收藏' },
 ];
 
 interface Props {
@@ -12,13 +11,12 @@ interface Props {
   onTabChange: (tab: ReadingTab) => boolean | void;
   transcript: ReactNode;
   favorites: ReactNode;
-  questions: ReactNode;
 }
 
 export default function ReadingNotesWorkspace({ activeTab, onTabChange,
-  transcript, favorites, questions }: Props) {
+  transcript, favorites }: Props) {
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
-  const content = { transcript, favorites, questions };
+  const content = { transcript, favorites };
   return <>
     <div className="reading-tabs" role="tablist" aria-label="视频学习内容">
       {tabs.map((tab, index) => <button key={tab.id} type="button" role="tab"

@@ -50,7 +50,7 @@ def test_migration_roundtrip_and_metadata_match(database):
         'raw_transcript_words', 'learning_transcript_segments',
         'transcript_normalization_runs', 'transcript_revisions', 'transcript_marks',
         'transcript_chunk_layouts', 'transcript_chunk_segments',
-        'transcript_mark_keys', 'transcript_questions',
+        'transcript_mark_keys',
         'video_collections', 'video_collection_items', 'video_import_previews',
         'video_import_batches', 'video_import_batch_items',
         'video_import_retry_requests', 'video_import_retry_bindings',

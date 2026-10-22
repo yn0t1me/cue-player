@@ -14,7 +14,7 @@ Duplicate imports open/reuse the same video and preserve saved preference, Raw a
 
 ## Collections and Batches
 
-Collections support create, rename, description edits, adding existing videos, ordering, removal and deletion. Names may repeat. One video can belong to multiple collections; a collection contains it once. Episode numbers are positions, not video identities. Reimporting an existing member does not reorder it. New members append to an existing collection; deleting a collection/member preserves the videos, subtitles and notes.
+Collections support create, rename, description edits, adding existing videos, ordering, removal and deletion. Names may repeat. One video can belong to multiple collections; a collection contains it once. Episode numbers are positions, not video identities. Reimporting an existing member does not reorder it. New members append to an existing collection; deleting a collection/member preserves the videos, subtitles and favorites.
 
 Batch destinations are library only, a new collection or an existing collection; a collection is not mandatory. A batch records one submission and counts ready/processing/waiting/failed outcomes, with unavailable preview entries separate. Do not turn aggregate stage percentages into an ETA. Processing is serial; one item failure does not block the others. Closing the page does not cancel backend processing; refresh reads persisted progress. Restart recovery does not promise that every interrupted job will resume.
 
@@ -22,7 +22,7 @@ Batch destinations are library only, a new collection or an existing collection;
 
 Explicit single/batch retry is available for eligible failed first imports, creates a new job and preserves the failed attempt/source evidence. Pending/running, already-ready/published, or inconsistent data are not blindly restarted. Retry is separate from source switching or Reprocess.
 
-The library offers collections and all videos; collection membership does not hide a video from all videos. A collection view has ordered entries and status. Opening through a collection preserves that viewing context and provides a collapsible episode directory plus previous/next navigation. Opening independently does not select a collection automatically. Episode switching starts the new video at its beginning for manual playback; collapsing the directory does not rebuild the current player. Draft protection and old-player cleanup apply across navigation. Missing collection context does not make a saved video inaccessible.
+The library offers collections and all videos; collection membership does not hide a video from all videos. A collection view has ordered entries and status. Opening through a collection preserves that viewing context and provides a collapsible episode directory plus previous/next navigation. Opening independently does not select a collection automatically. Episode switching starts the new video at its beginning for manual playback; collapsing the directory does not rebuild the current player. Pending selection/save guards and old-player cleanup apply across navigation. Missing collection context does not make a saved video inaccessible.
 
 ## Source and Verification References
 

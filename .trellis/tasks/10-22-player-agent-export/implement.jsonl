@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/product/index.md", "reason": "原产品规范入口；本次范围以任务 PRD 的已确认修改为准"}
+{"file": ".trellis/spec/product/notes-and-output.md", "reason": "收藏和退役问答及输出的原行为"}
+{"file": ".trellis/spec/product/reading-experience.md", "reason": "保留播放器、选字、跟随和工作区生命周期"}
+{"file": ".trellis/spec/product/subtitle-workflow.md", "reason": "保留外部字幕加工与 SRT，理解版本和词块"}
+{"file": ".trellis/spec/product/import-and-collections.md", "reason": "导入与合集保留范围"}
+{"file": ".trellis/spec/product/scope-and-acceptance.md", "reason": "真实外部验收限制，避免扩大教学范围"}
+{"file": ".trellis/spec/contracts/notes-and-anchors.md", "reason": "收藏锚点、Unicode、并发与旧版本上下文"}
+{"file": ".trellis/spec/contracts/data-model.md", "reason": "数据库删除范围与非退役关系保护"}
+{"file": ".trellis/spec/contracts/publication.md", "reason": "原子发布与导出修订一致性"}
+{"file": ".trellis/spec/contracts/http-api.md", "reason": "API 通用响应及错误约定"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "前端修改前规范入口"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "查询失效和状态所有权"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "wire 类型与布局修订校验"}
+{"file": ".trellis/spec/backend/index.md", "reason": "后端修改前规范入口"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "迁移、外键、隔离与备份"}
+{"file": ".trellis/spec/guides/project-engineering.md", "reason": "WSL、数据库安全和证据边界"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端行为、构建和真实浏览器证据"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "接口与迁移行为验证"}

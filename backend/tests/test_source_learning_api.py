@@ -52,7 +52,7 @@ def setup(tmp_path, monkeypatch):
             session.add(TranscriptChunkSegment(layout_id=layout.id, segment_id=segment.id,
                                                boundary_offsets=[3]))
             session.add(TranscriptMark(video_id=video.id, revision_id=revision.id, segment_id=segment.id,
-                start_offset=0, end_offset=3, selected_text='Old', note='Preserve me'))
+                start_offset=0, end_offset=3, selected_text='Old'))
             session.add_all(RawTranscriptCue(video_id=video.id, sequence_index=cue.sequence_index,
                 start_seconds=cue.start_seconds, end_seconds=cue.end_seconds, text=cue.text,
                 source_type=SubtitleSource.YOUTUBE_AUTO) for cue in parse_source_vtt(VTT))
@@ -92,10 +92,9 @@ def _snapshot(factory, legacy_columns=False):
     with factory() as session:
         result = {}
         for table in tables:
-            columns = '*'
-            if legacy_columns:
-                columns = ', '.join(row[1] for row in session.execute(text(f'PRAGMA table_info({table})'))
-                                    if row[1] not in {'subtitle_preference', 'translation_zh'})
+            excluded = {'note'} | ({'subtitle_preference', 'translation_zh'} if legacy_columns else set())
+            columns = ', '.join(row[1] for row in session.execute(text(f'PRAGMA table_info({table})'))
+                                if row[1] not in excluded)
             result[table] = session.execute(text(f'SELECT {columns} FROM {table} ORDER BY id')).all()
         return result
 
@@ -134,7 +133,7 @@ def test_read_preview_publish_history_marks_and_exports(setup):
             assert {unit['cue_id'] for unit in row.source_refs['units']} <= cue_ids
             assert all(unit['raw_vtt_sha256'] is None for unit in row.source_refs['units'])
     marks = client.get(f'/api/videos/{video_id}/marks').json()['items']
-    assert len(marks) == 1 and not marks[0]['is_current'] and marks[0]['note'] == 'Preserve me'
+    assert len(marks) == 1 and not marks[0]['is_current'] and marks[0]['segment_text'] == 'Old learning text'
     history = client.get(_endpoint(video_id, 'revisions')).json()['items']
     assert [item['origin'] for item in history] == ['source_aligned', 'generated']
     old_id = history[-1]['id']
@@ -527,15 +526,7 @@ def test_concurrent_bilingual_confirms_do_not_lose_translation(setup, identical)
 
 def test_011_upgrade_preserves_all_old_columns_and_checks_metadata(setup):
     client, video_id, factory, _, config = setup
-    from app.db.models import TranscriptQuestion
     from sqlalchemy.exc import IntegrityError
-    segment = client.get(f'/api/videos/{video_id}/transcript').json()['segments'][0]
-    with factory() as session:
-        session.add(TranscriptQuestion(video_id=video_id,
-            revision_id=session.get(Video, video_id).current_revision_id, segment_id=segment['id'],
-            start_offset=0, end_offset=3, selected_text='Old', question='含义？',
-            answer='旧解答', has_saved_answer=True))
-        session.commit()
     command.downgrade(config, '010_saved_answer_history')
     with factory() as session:
         tables = session.execute(text(

@@ -11,7 +11,7 @@ from app.schemas.transcripts import TranscriptResponse
 from app.schemas.chunk_layouts import ChunkLayoutStateResponse
 from app.schemas.transcript_marks import (
     CreateTranscriptMarkRequest, TranscriptMarkListResponse,
-    TranscriptMarkResponse, UpdateTranscriptMarkRequest,
+    TranscriptMarkResponse,
 )
 from app.schemas.videos import ImportVideoRequest, ImportVideoResponse, VideoListResponse, VideoResponse
 from app.services.videos import import_video, video_response
@@ -19,7 +19,7 @@ from app.services.transcripts import (
     get_transcript, get_transcript_revision, list_transcript_revisions,
 )
 from app.services.srt_export import export_raw_srt
-from app.services.transcript_marks import create_mark, delete_mark, list_marks, update_mark_note
+from app.services.transcript_marks import create_mark, delete_mark, list_marks
 from app.services.chunk_layouts import get_chunk_layout
 
 from app.schemas.source_learning import (
@@ -29,13 +29,6 @@ from app.services.source_learning import (
     read_learning_source, preview_source_learning, publish_source_learning, export_learning_srt,
 )
 
-from app.schemas.transcript_questions import (
-    CreateTranscriptQuestionRequest, UpdateTranscriptQuestionRequest,
-    TranscriptQuestionResponse, TranscriptQuestionListResponse,
-)
-from app.services.transcript_questions import (
-    create_question, list_questions, update_question, delete_question,
-)
 
 from app.schemas.video_collections import RetryVideoRequest, RetryVideoResponse
 from app.services.import_retries import retry_video
@@ -131,13 +124,6 @@ def add_transcript_mark(video_id: str, payload: CreateTranscriptMarkRequest,
     return result
 
 
-@router.patch('/{video_id}/marks/{mark_id}', response_model=TranscriptMarkResponse)
-def edit_transcript_mark_note(video_id: str, mark_id: str,
-                              payload: UpdateTranscriptMarkRequest,
-                              session: DatabaseSession):
-    return update_mark_note(session, video_id, mark_id, payload.note)
-
-
 @router.delete('/{video_id}/marks/{mark_id}', status_code=204)
 def remove_transcript_mark(video_id: str, mark_id: str, session: DatabaseSession):
     delete_mark(session, video_id, mark_id)
@@ -170,25 +156,3 @@ def download_learning_srt(video_id: str, session: DatabaseSession):
     return Response(content=content, media_type='application/x-subrip; charset=utf-8',
                     headers={'Content-Disposition': f'attachment; filename="{youtube_id}-learning.srt"',
                              'Cache-Control': 'no-store'})
-
-
-@router.get('/{video_id}/questions', response_model=TranscriptQuestionListResponse)
-def read_transcript_questions(video_id: str, session: DatabaseSession):
-    return list_questions(session, video_id)
-
-
-@router.post('/{video_id}/questions', response_model=TranscriptQuestionResponse, status_code=201)
-def add_transcript_question(video_id: str, payload: CreateTranscriptQuestionRequest,
-                            request: Request):
-    return create_question(request.app.state.session_factory, video_id, payload)
-
-
-@router.patch('/{video_id}/questions/{question_id}', response_model=TranscriptQuestionResponse)
-def edit_transcript_question(video_id: str, question_id: str,
-                             payload: UpdateTranscriptQuestionRequest, session: DatabaseSession):
-    return update_question(session, video_id, question_id, payload)
-
-
-@router.delete('/{video_id}/questions/{question_id}', status_code=204)
-def remove_transcript_question(video_id: str, question_id: str, session: DatabaseSession):
-    delete_question(session, video_id, question_id)

@@ -23,4 +23,3 @@ class TranscriptMark(IdentityCreated, Updated, Base):
     start_offset: Mapped[int]
     end_offset: Mapped[int]
     selected_text: Mapped[str] = mapped_column(Text)
-    note: Mapped[str | None] = mapped_column(Text)

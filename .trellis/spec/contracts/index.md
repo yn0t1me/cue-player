@@ -1,6 +1,6 @@
 # Current Technical Contracts
 
-Updated: 2026-10-21. These are current application contracts, not new implementation authorization or runtime acceptance. Product intent and scope live in [product specs](../product/index.md); coding conventions live in the frontend/backend indexes.
+Updated: 2026-10-22. These are current application contracts, not new implementation authorization or runtime acceptance. Product intent and scope live in [product specs](../product/index.md); coding conventions live in the frontend/backend indexes.
 
 ## Load by Boundary
 
@@ -8,7 +8,7 @@ Updated: 2026-10-21. These are current application contracts, not new implementa
 |---|---|
 | HTTP route, response or common error | [HTTP API](http-api.md) |
 | Tables, relationships, revisions, constraints | [Data model](data-model.md) |
-| Selection positions, favorites or questions | [Notes and anchors](notes-and-anchors.md) |
+| Selection positions and favorites | [Favorite anchors](notes-and-anchors.md) |
 | Collections, previews or batch submission | [Collections and batches](collections-and-batches.md) |
 | Job transitions, restart or explicit retry | [Processing and retries](processing-and-retries.md) |
 | Initial subtitles, external adapters, temporary media | [Transcript pipeline](transcript-pipeline.md) |

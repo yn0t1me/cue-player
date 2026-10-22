@@ -18,6 +18,6 @@ Reuse Base naming conventions, IdentityCreated UUIDs, Updated, UTCDateTime and e
 
 Schema changes require Alembic revisions under `backend/migrations/versions/`; model metadata alone does not migrate a database. `backend/migrations/env.py` owns database parent creation and migrations; app startup creates the data directory without creating tables (`backend/tests/test_health.py`).
 
-Test upgrades on isolated files, including populated legacy fixtures and unsafe-data rejection. `backend/tests/test_retired_subtitle_migration.py` verifies 014 refuses unsupported rows before changing anything and preserves current child rows. `backend/tests/test_database.py` runs Alembic metadata check. No assumption that every downgrade may discard new data.
+Test upgrades on isolated files, including populated legacy fixtures and unsafe-data rejection. `backend/tests/test_retired_subtitle_migration.py` verifies 014 refuses unsupported rows before changing anything and preserves current child rows. Migration 015 removes notes/questions while preserving marks and their bindings; verify populated upgrades and structure-only downgrade separately. `backend/tests/test_database.py` runs Alembic metadata check. No assumption that every downgrade may discard new data.
 
 Use [shared verification guidance](../guides/project-engineering.md) for isolation. Back up and verify daily data before an explicitly authorized daily migration; a documentation task does not authorize daily data writes.

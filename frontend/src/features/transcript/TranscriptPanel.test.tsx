@@ -157,7 +157,7 @@ it('highlights only marks attached to the current subtitle version', async () =>
     revision_id, revision_number: 1, revision_origin: 'generated', is_current: revision_id === 'current',
     segment_id: 'one', segment_sequence_index: 0, segment_start: 1, segment_end: 3,
     segment_text: 'Remember this.', start_offset: 0, end_offset: 8, selected_text: 'Remember',
-    note: null, created_at: '', updated_at: '' });
+    created_at: '', updated_at: '' });
   await act(async () => root.render(<TranscriptPanel currentTime={0} onPlaySegment={() => true}
     marks={[mark('old'), mark('current')]} transcript={{ video_id: 'video-id', revision_id: 'current',
       origin: 'generated', normalization_version: 1, segments: [

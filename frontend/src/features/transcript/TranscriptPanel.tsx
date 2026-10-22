@@ -148,7 +148,7 @@ export default function TranscriptPanel({ transcript, currentTime, onPlaySegment
     </div>
     <p className="transcript-note">时间来自原始字幕。{readingMode === 'chunks' && hasChunkLayout
         ? '细刻线表示自然词块，仍可跨词块选择文字。'
-        : '点击时间或正文可回听；选中同一句内的文字可收藏、做笔记或提问。'}</p>
+        : '点击时间或正文可回听；选中同一句内的文字可收藏表达。'}</p>
     {showTranslation && !transcript.segments.some(item => item.translation_zh) &&
       <p className="translation-empty" role="status">此版本尚无中文，可在字幕管理中生成含翻译的学习字幕。</p>}
     {playbackMessage && <p className="transcript-playback-message" role="status">{playbackMessage}</p>}

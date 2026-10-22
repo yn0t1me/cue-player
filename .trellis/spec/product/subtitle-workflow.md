@@ -1,6 +1,6 @@
 # Subtitle Preparation and Publication
 
-Status: current behavior, updated 2026-10-21. Source-specific external processing uses one roundtrip with English chunks and Chinese translation; retired SRT/cloud paths are outside the current workflow.
+Status: current behavior, updated 2026-10-22. Source-specific external processing uses one roundtrip with English chunks and Chinese translation; retired SRT/cloud paths are outside the current workflow.
 
 ## Initial Reading Subtitles
 
@@ -24,9 +24,9 @@ External processing lets users choose their model and review semantic changes wh
 
 Sentence/chunk views share the same canonical English. Chunk separators are presentation metadata, not literal additions to saved English; chunks do not have invented independent playback timing. English selection anchors remain tied to the sentence text. Chinese is separate from English/chunk boundaries/selection anchors. Preview, reading list and overlay have independent Chinese toggles, off by engineering default and page-local; hiding translation neither deletes it nor requests a new one. Editions without Chinese stay English-only.
 
-Historical revisions and their note context remain readable. Publishing never guesses a remapping of old selections into new sentences. No automatic deletion of retained subtitle or note history is defined.
+Historical revisions and their favorite context remain readable. Publishing never guesses a remapping of old selections into new sentences. No automatic deletion of retained subtitle or favorite history is defined.
 
-Raw-derived English SRT export and current learning English SRT export remain available, with different sources. Raw export is not guaranteed to be the exact original VTT bytes and does not read current edited English. Bilingual SRT export, legacy SRT publication, JSON v1 import and cloud run/batch/correction history are not current capabilities.
+Raw-derived English SRT export and current learning English SRT export remain available in subtitle management, with different sources. Separate Agent material export uses only the current learning transcript, with optional existing Chinese and chunks; its rules live in [material output](notes-and-output.md). Raw export is not guaranteed to be the exact original VTT bytes and does not read current edited English. Bilingual SRT export, legacy SRT publication, JSON v1 import and cloud run/batch/correction history are not current capabilities.
 
 ## Evidence
 

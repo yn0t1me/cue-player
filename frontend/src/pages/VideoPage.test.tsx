@@ -6,18 +6,18 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   createTranscriptFavorite,
-  createTranscriptQuestion, updateTranscriptQuestion,
+
   deleteTranscriptMark,
-  deleteTranscriptQuestion,
+
   getChunkLayout,
   getRawSrt, getLearningSource, getLearningSrt, previewSourceLearning, publishSourceLearning,
   getTranscript,
   getTranscriptMarks,
-  getTranscriptQuestions,
+
   getTranscriptRevisions,
   getTranscriptRevision,
   getVideo,
-  updateTranscriptMarkNote,
+
 } from '../api/videos';
 import type { LearningSource, TranscriptMark, Video } from '../types/video';
 import VideoPage from './VideoPage';
@@ -29,8 +29,8 @@ vi.mock('../api/videos', () => ({
   getVideo: vi.fn(), getTranscript: vi.fn(), getRawSrt: vi.fn(),
   getLearningSource: vi.fn(), getLearningSrt: vi.fn(), previewSourceLearning: vi.fn(), publishSourceLearning: vi.fn(),
   getTranscriptRevisions: vi.fn(),
-  getTranscriptRevision: vi.fn(), getTranscriptMarks: vi.fn(), getTranscriptQuestions: vi.fn(), createTranscriptFavorite: vi.fn(), createTranscriptQuestion: vi.fn(), updateTranscriptQuestion: vi.fn(),
-  updateTranscriptMarkNote: vi.fn(), deleteTranscriptMark: vi.fn(), deleteTranscriptQuestion: vi.fn(), getChunkLayout: vi.fn(),
+  getTranscriptRevision: vi.fn(), getTranscriptMarks: vi.fn(), createTranscriptFavorite: vi.fn(),
+  deleteTranscriptMark: vi.fn(), getChunkLayout: vi.fn(),
 }));
 const playerHandle = vi.hoisted(() => ({ seekTo: vi.fn(() => true), play: vi.fn(() => true),
   mounted: vi.fn(), destroyed: vi.fn(), time: 10.5 }));
@@ -83,7 +83,6 @@ beforeEach(() => {
   vi.mocked(getLearningSource).mockResolvedValue({ format: 'learning-source-v2', source_type: 'youtube_auto', processing_mode: 'auto_units', source_video_id: 'M7lc1UVf-VE', source_digest: 'a'.repeat(64), extractor_version: 'youtube-vtt-units-v1', units: [{ id: 'u000001', text: 'Raw source', start_ms: 6500, time_basis: 'inline_timestamp' }] });
   vi.mocked(getRawSrt).mockResolvedValue('1\n00:00:02,000 --> 00:00:04,000\nRaw text\n');
   vi.mocked(getTranscriptMarks).mockResolvedValue({ items: [] });
-  vi.mocked(getTranscriptQuestions).mockResolvedValue({ items: [] });
   vi.mocked(getChunkLayout).mockResolvedValue({
     video_id: 'video-id', revision_id: 'revision-id', layout: null,
   });
@@ -109,7 +108,7 @@ it('saves a whole-sentence mark and shows it in the same-place favorites tab', a
       segment_id: payload.segment_id, segment_sequence_index: 0, segment_start: 2,
       segment_end: 4, segment_text: 'Earlier sentence.',
       start_offset: payload.start_offset, end_offset: payload.end_offset,
-      selected_text: payload.selected_text, note: payload.note ?? null,
+      selected_text: payload.selected_text,
       created_at: '', updated_at: '' }];
     return { item: items[0], created: true };
   });
@@ -130,7 +129,7 @@ it('saves a whole-sentence mark and shows it in the same-place favorites tab', a
     selected_text: 'Earlier sentence.',
   });
   expect(playerHandle.seekTo).not.toHaveBeenCalled();
-  await vi.waitFor(() => expect(container.querySelector('.favorites-panel .collection-heading')?.textContent).toContain('01'));
+  await vi.waitFor(() => expect(container.querySelector('.favorites-panel .collection-heading')?.textContent).toContain('1'));
   expect(container.querySelector('.segment-readable mark')?.textContent).toBe('Earlier sentence.');
   await act(async () => (container.querySelector('#reading-tab-favorites') as HTMLButtonElement).click());
   await vi.waitFor(() => expect(container.querySelector('.favorites-panel .collection-card')?.textContent).toContain('Earlier sentence.'));
@@ -142,14 +141,11 @@ it('preserves all tab scroll positions and playback when switching in place', as
   const queryClient = await renderReadingPage();
   const list = container.querySelector('.transcript-list') as HTMLOListElement;
   const favorites = container.querySelector('#reading-panel-favorites .reading-collection-scroll') as HTMLElement;
-  const questions = container.querySelector('#reading-panel-questions .reading-collection-scroll') as HTMLElement;
   const player = container.querySelector('.report-time');
   await clickControl('.report-time');
   await act(async () => { list.scrollTop = 55; list.dispatchEvent(new Event('scroll', { bubbles: true })); });
   await clickControl('#reading-tab-favorites');
   favorites.scrollTop = 88;
-  await clickControl('#reading-tab-questions');
-  questions.scrollTop = 122;
   playerHandle.time = 2.5;
   await clickControl('.report-time');
   expect(container.querySelector('.player-subtitle')?.textContent).toBe('Earlier sentence.');
@@ -159,8 +155,6 @@ it('preserves all tab scroll positions and playback when switching in place', as
   expect(container.querySelector('.transcript-follow-control')).not.toBeNull();
   await clickControl('#reading-tab-favorites');
   expect(favorites.scrollTop).toBe(88);
-  await clickControl('#reading-tab-questions');
-  expect(questions.scrollTop).toBe(122);
   expect(container.querySelector('.report-time')).toBe(player);
   expect(playerHandle.mounted).toHaveBeenCalledOnce();
   expect(playerHandle.destroyed).not.toHaveBeenCalled();
@@ -528,11 +522,11 @@ it('supports roving keyboard focus and hides inactive panels from assistive tech
   expect(container.querySelector('#reading-panel-transcript')?.hasAttribute('inert')).toBe(true);
   expect(container.querySelector('#reading-panel-favorites')?.hasAttribute('inert')).toBe(false);
   await act(async () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
-  expect(document.activeElement?.id).toBe('reading-tab-questions');
+  expect(document.activeElement?.id).toBe('reading-tab-favorites');
   await act(async () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
   expect(document.activeElement?.id).toBe('reading-tab-transcript');
   await act(async () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
-  expect(document.activeElement?.id).toBe('reading-tab-questions');
+  expect(document.activeElement?.id).toBe('reading-tab-favorites');
   await act(async () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
   expect(document.activeElement?.id).toBe('reading-tab-transcript');
   expect(playerHandle.seekTo).not.toHaveBeenCalled();
@@ -566,36 +560,7 @@ it('does not follow hidden subtitles and resumes following the current sentence 
   }
 });
 
-it('fetches complete questions before tab selection and supports failed reads without affecting the player', async () => {
-  vi.mocked(getTranscriptQuestions).mockRejectedValueOnce(new Error('Unable to read questions'));
-  const client = await renderReadingPage();
-  expect(getTranscriptQuestions).toHaveBeenCalled();
-  await clickControl('#reading-tab-questions');
-  await vi.waitFor(() => expect(container.querySelector('.questions-panel')?.textContent).toContain('Unable to read questions'));
-  vi.mocked(getTranscriptQuestions).mockResolvedValue({ items: [{
-    id: 'question', video_id: 'video-id', revision_id: 'old', revision_number: 1,
-    revision_origin: 'generated', is_current: false, segment_id: 'old-segment',
-    segment_sequence_index: 0, segment_start: 2, segment_end: 4,
-    segment_text: 'Earlier sentence.', start_offset: 0, end_offset: 7,
-    selected_text: 'Earlier', question: 'Why this wording?', answer: null,
-    created_at: '', updated_at: '',
-  }] });
-  await act(async () => (container.querySelector('.questions-panel .collection-error button') as HTMLButtonElement).click());
-  await vi.waitFor(() => expect(container.querySelector('.questions-panel .collection-group')?.textContent).toContain('Why this wording?'));
-  expect(container.querySelector('.questions-panel .collection-group')?.textContent).toContain('旧字幕版本');
-  expect(playerHandle.mounted).toHaveBeenCalledOnce();
-  expect(playerHandle.seekTo).not.toHaveBeenCalled();
-  expect(playerHandle.play).not.toHaveBeenCalled();
-  client.clear();
-});
 
-async function inputDraft(value: string, index = 0) {
-  const textarea = container.querySelectorAll('.reader-fixed-editor textarea')[index];
-  await act(async () => {
-    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, value);
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-}
 async function menuAction(label: string) {
   await clickControl('.segment-mark-whole');
   await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.reader-selection-menu button')]
@@ -605,7 +570,7 @@ const existingFavorite: TranscriptMark = {
   id: 'existing', video_id: 'video-id', revision_id: 'revision-id', revision_number: 1,
   revision_origin: 'generated', is_current: true, segment_id: 'one', segment_sequence_index: 0,
   segment_start: 2, segment_end: 4, segment_text: 'Earlier sentence.', start_offset: 0, end_offset: 17,
-  selected_text: 'Earlier sentence.', note: 'original note', created_at: '', updated_at: '',
+  selected_text: 'Earlier sentence.', created_at: '', updated_at: '',
 };
 
 it.each([true, false])('offers undo only for a newly created favorite (%s)', async created => {
@@ -634,114 +599,12 @@ it('keeps the selection and allows retry when quick favorite fails', async () =>
   client.clear();
 });
 
-it('guards dirty tab switches and close, supports keeping and discarding the draft', async () => {
-  const client = await renderReadingPage();
-  await menuAction('提问'); await inputDraft('Why this expression?');
-  await clickControl('#reading-tab-favorites');
-  expect(container.querySelector('#reading-tab-transcript')?.getAttribute('aria-selected')).toBe('true');
-  expect(container.querySelector('[role=alertdialog]')).not.toBeNull();
-  await clickControl('.reader-draft-decision button');
-  expect((container.querySelector('textarea') as HTMLTextAreaElement).value).toBe('Why this expression?');
-  await clickControl('.reader-fixed-editor [aria-label="关闭编辑"]');
-  expect(container.querySelector('[role=alertdialog]')).not.toBeNull();
-  await clickControl('.reader-draft-decision button');
-  await clickControl('#reading-tab-favorites');
-  await clickControl('.reader-draft-decision button:last-child');
-  expect(container.querySelector('#reading-tab-favorites')?.getAttribute('aria-selected')).toBe('true');
-  expect(container.querySelector('.reader-fixed-editor')).toBeNull();
-  expect(createTranscriptQuestion).not.toHaveBeenCalled();
-  client.clear();
-});
-
-it('retains draft and anchor through conflict refresh, then saves a manual question and answer', async () => {
-  const { ApiError } = await import('../api/client');
-  vi.mocked(createTranscriptQuestion).mockRejectedValueOnce(new ApiError('字幕已变化', 409, 'TRANSCRIPT_REVISION_CONFLICT'))
-    .mockResolvedValueOnce({ ...existingFavorite, question: 'Why?', answer: 'Manual answer' });
-  const client = await renderReadingPage();
-  await menuAction('提问'); await inputDraft('Why?'); await inputDraft('Manual answer', 1);
-  vi.mocked(getTranscript).mockResolvedValue({ video_id: 'video-id', revision_id: 'new-revision',
-    origin: 'generated', normalization_version: 1, segments: [{ id: 'new', sequence_index: 0, start: 2, end: 4, text: 'Replacement.' }] });
-  await clickControl('.reader-fixed-editor [type=submit]');
-  await vi.waitFor(() => expect(container.querySelector('.transcript-list')?.textContent).toContain('Replacement.'));
-  expect(container.querySelector('.reader-fixed-editor')?.textContent).toContain('字幕已变化');
-  expect((container.querySelector('textarea') as HTMLTextAreaElement).value).toBe('Why?');
-  await clickControl('.reader-fixed-editor [type=submit]');
-  expect(createTranscriptQuestion).toHaveBeenLastCalledWith('video-id', { revision_id: 'revision-id', segment_id: 'one',
-    start_offset: 0, end_offset: 17, selected_text: 'Earlier sentence.' }, 'Why?', 'Manual answer');
-  expect(playerHandle.play).not.toHaveBeenCalled();
-  client.clear();
-});
-
-it('loads an existing note and explicitly patches it without another favorite create', async () => {
-  vi.mocked(getTranscriptMarks).mockResolvedValue({ items: [existingFavorite] });
-  const client = await renderReadingPage();
-  await menuAction('做笔记');
-  expect((container.querySelector('textarea') as HTMLTextAreaElement).value).toBe('original note');
-  await inputDraft('updated'); await clickControl('.reader-fixed-editor [type=submit]');
-  expect(updateTranscriptMarkNote).toHaveBeenCalledWith('video-id', 'existing', 'updated');
-  expect(createTranscriptFavorite).not.toHaveBeenCalled(); client.clear();
-});
-
-it('preserves a new-note draft when a concurrent duplicate create wins, requires explicit patch', async () => {
-  vi.mocked(createTranscriptFavorite).mockResolvedValue({ item: existingFavorite, created: false });
-  const client = await renderReadingPage();
-  await menuAction('做笔记'); await inputDraft('my draft'); await clickControl('.reader-fixed-editor [type=submit]');
-  expect((container.querySelector('textarea') as HTMLTextAreaElement).value).toBe('my draft');
-  expect(updateTranscriptMarkNote).not.toHaveBeenCalled();
-  expect(container.querySelector('.reader-fixed-editor')?.textContent).toContain('再次保存将修改现有备注');
-  await clickControl('.reader-fixed-editor [type=submit]');
-  expect(updateTranscriptMarkNote).toHaveBeenCalledWith('video-id', 'existing', 'my draft'); client.clear();
-});
-
-it('uses the fixed editor to clear answers on an old-version question', async () => {
-  vi.mocked(getTranscriptQuestions).mockResolvedValue({ items: [{ ...existingFavorite, id: 'old-question',
-    revision_id: 'old', is_current: false, question: 'Old question?', answer: 'Old answer' }] });
-  const client = await renderReadingPage(); await clickControl('#reading-tab-questions');
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.collection-filters button')].find(b => b.textContent === '全部（1）')!.click());
-  await vi.waitFor(() => expect(container.querySelector('.questions-panel .collection-group button')).not.toBeNull());
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.questions-panel .collection-card-actions button')].find(b => b.textContent === '编辑解答')!.click());
-  expect(container.querySelectorAll('.reader-fixed-editor textarea')).toHaveLength(1);
-  await inputDraft(''); await clickControl('.reader-fixed-editor [type=submit]');
-  expect(updateTranscriptQuestion).toHaveBeenCalledWith('video-id', 'old-question', { answer: null });
-  client.clear();
-});
-
-it('suspends following during selection/editing and restores previous automatic mode', async () => {
-  const original = HTMLElement.prototype.scrollTo;
-  const scroll = vi.fn(); HTMLElement.prototype.scrollTo = scroll;
-  try {
-    const client = await renderReadingPage(); await clickControl('.report-time');
-    const before = scroll.mock.calls.length;
-    await menuAction('提问'); playerHandle.time = 2.5; await clickControl('.report-time');
-    expect(scroll).toHaveBeenCalledTimes(before);
-    await clickControl('.reader-fixed-editor [aria-label="关闭编辑"]');
-    expect(scroll).toHaveBeenCalledTimes(before + 1);
-    expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.play).not.toHaveBeenCalled();
-    client.clear();
-  } finally { if (original) HTMLElement.prototype.scrollTo = original; else Reflect.deleteProperty(HTMLElement.prototype, 'scrollTo'); }
-});
-
-
-it('creates a favorite with an optional note in one save and offers undo', async () => {
-  vi.mocked(createTranscriptFavorite).mockResolvedValue({ item: existingFavorite, created: true });
-  const client = await renderReadingPage();
-  await menuAction('做笔记'); await inputDraft('my note'); await clickControl('.reader-fixed-editor [type=submit]');
-  expect(createTranscriptFavorite).toHaveBeenCalledWith('video-id', {
-    revision_id: 'revision-id', segment_id: 'one', start_offset: 0, end_offset: 17,
-    selected_text: 'Earlier sentence.', note: 'my note',
-  });
-  expect(container.querySelector('.reader-notice')?.textContent).toContain('撤销');
-  expect(updateTranscriptMarkNote).not.toHaveBeenCalled();
-  client.clear();
-});
-
 
 it('replays old collection context at its saved time while keeping the current revision and player', async () => {
   vi.mocked(getTranscriptMarks).mockResolvedValue({ items: [{ ...existingFavorite, is_current: false,
     revision_id: 'old', revision_number: 1, segment_id: 'old-segment', segment_start: 7.75,
     segment_text: 'Old expression in an older sentence.' }] });
   const client = await renderReadingPage(); await clickControl('#reading-tab-favorites');
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.favorites-panel button')].find(b => b.textContent === '显示上下文')!.click());
   await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.favorites-panel button')].find(b => b.textContent === '回听旧版')!.click());
   expect(playerHandle.seekTo).toHaveBeenCalledWith(7.75); expect(playerHandle.play).toHaveBeenCalledOnce();
   expect(container.querySelector('.transcript-list')?.textContent).toContain('Earlier sentence.');
@@ -751,156 +614,6 @@ it('replays old collection context at its saved time while keeping the current r
   expect(playerHandle.mounted).toHaveBeenCalledOnce(); client.clear();
 });
 
-it('re-reads a saved question answer after leaving and opening the page with a fresh cache', async () => {
-  let record = { ...existingFavorite, id: 'saved-question', question: 'Why this?', answer: null as string | null };
-  vi.mocked(getTranscriptQuestions).mockImplementation(async () => ({ items: [record] }));
-  vi.mocked(updateTranscriptQuestion).mockImplementation(async (_video, _id, patch) => {
-    record = { ...record, ...patch }; return record;
-  });
-  let client = await renderReadingPage(); await clickControl('#reading-tab-questions');
-  await vi.waitFor(() => expect(container.querySelector('.questions-panel .collection-card-actions')).not.toBeNull());
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.questions-panel button')].find(b => b.textContent === '添加解答')!.click());
-  await inputDraft('Saved manual answer'); await clickControl('.reader-fixed-editor [type=submit]');
-  await act(async () => root.render(null)); client.clear();
-  client = await renderReadingPage(); await clickControl('#reading-tab-questions');
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.collection-filters button')].find(b => b.textContent === '全部（1）')!.click());
-  await vi.waitFor(() => expect(container.querySelector('.questions-panel')?.textContent).toContain('编辑解答'));
-  expect(container.querySelector('.collection-answer')).toBeNull();
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.questions-panel button')].find(b => b.textContent === '显示解答')!.click());
-  expect(container.querySelector('.collection-answer')?.textContent).toContain('Saved manual answer'); client.clear();
-});
-
-it('synchronizes first-answer favorites, filters and full linked questions across tabs without controlling playback', async () => {
-  let favorites: TranscriptMark[] = [];
-  let records = [{ ...existingFavorite, id: 'q1', question: 'First question', answer: null as string | null },
-    { ...existingFavorite, id: 'q2', question: 'Second question', answer: null as string | null }];
-  vi.mocked(getTranscriptMarks).mockImplementation(async () => ({ items: favorites }));
-  vi.mocked(getTranscriptQuestions).mockImplementation(async () => ({ items: records }));
-  vi.mocked(updateTranscriptQuestion).mockImplementation(async (_video, id, patch) => {
-    records = records.map(record => record.id === id ? { ...record, ...patch } : record);
-    if (patch.answer?.trim()) favorites = [existingFavorite];
-    return records.find(record => record.id === id)!;
-  });
-  const client = await renderReadingPage();
-  expect(client.getQueryData<{ items: unknown[] }>(['transcript-questions', 'video-id'])?.items).toHaveLength(2);
-  await clickControl('#reading-tab-questions');
-  const button = async (panel: string, label: string) => act(async () => {
-    [...container.querySelectorAll<HTMLButtonElement>(`${panel} button`)].find(b => b.textContent === label)!.click();
-  });
-  await button('.questions-panel', '添加解答'); await inputDraft('First answer');
-  const filterButton = [...container.querySelectorAll<HTMLButtonElement>('.collection-filters button')].find(b => b.textContent === '全部（2）')!;
-  expect(filterButton.disabled).toBe(true);
-  await clickControl('#reading-tab-favorites');
-  expect(container.querySelector('[role=alertdialog]')).not.toBeNull();
-  await button('[role=alertdialog]', '继续编辑');
-  expect((container.querySelector('.reader-fixed-editor textarea') as HTMLTextAreaElement).value).toBe('First answer');
-  await clickControl('.reader-fixed-editor [type=submit]');
-  await vi.waitFor(() => expect(container.querySelector('.collection-filters')?.textContent).toContain('待解答（1）'));
-  expect(container.querySelector('.questions-panel .collection-group')?.textContent).not.toContain('First question');
-  expect(client.getQueryData<{ items: unknown[] }>(['transcript-marks', 'video-id'])?.items).toHaveLength(1);
-  expect(createTranscriptFavorite).not.toHaveBeenCalled();
-  await clickControl('#reading-tab-favorites'); await button('.favorites-panel', '显示问题');
-  expect(container.querySelectorAll('.favorites-panel [data-question-id]')).toHaveLength(2);
-  await button('.favorites-panel', '显示解答');
-  expect(container.querySelector('.favorites-panel')?.textContent).toContain('First answer');
-  await button('.favorites-panel', '编辑解答'); await inputDraft(''); await clickControl('.reader-fixed-editor [type=submit]');
-  await vi.waitFor(() => expect(container.querySelector('.collection-filters')?.textContent).toContain('待解答（2）'));
-  expect(client.getQueryData<{ items: unknown[] }>(['transcript-marks', 'video-id'])?.items).toHaveLength(1);
-  vi.mocked(deleteTranscriptQuestion).mockImplementation(async (_video, id) => { records = records.filter(record => record.id !== id); });
-  await button('.favorites-panel', '删除问题'); await button('.favorites-panel', '确认删除问题');
-  await vi.waitFor(() => expect(container.querySelectorAll('.favorites-panel [data-question-id]')).toHaveLength(1));
-  expect(container.querySelector('.collection-filters')?.textContent).toContain('全部（1）');
-  vi.mocked(deleteTranscriptMark).mockImplementation(async () => { favorites = []; });
-  await button('.favorites-panel', '取消收藏'); await button('.favorites-panel', '确认取消收藏');
-  await vi.waitFor(() => expect(client.getQueryData<{ items: unknown[] }>(['transcript-marks', 'video-id'])?.items).toHaveLength(0));
-  expect(client.getQueryData<{ items: unknown[] }>(['transcript-questions', 'video-id'])?.items).toHaveLength(1);
-  await clickControl('#reading-tab-questions');
-  expect(container.querySelector('.collection-filters [aria-pressed=true]')?.textContent).toBe('待解答（1）');
-  expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.destroyed).not.toHaveBeenCalled();
-  expect(playerHandle.seekTo).not.toHaveBeenCalled(); expect(playerHandle.play).not.toHaveBeenCalled();
-  expect(client.getQueryData<{ revision_id: string }>(['transcript', 'video-id'])?.revision_id).toBe('revision-id');
-  client.clear();
-});
-
-it('refreshes favorites and the complete question cache after creating a question with an answer', async () => {
-  let favorites: TranscriptMark[] = [];
-  let records: import('../types/video').TranscriptQuestion[] = [];
-  vi.mocked(getTranscriptMarks).mockImplementation(async () => ({ items: favorites }));
-  vi.mocked(getTranscriptQuestions).mockImplementation(async () => ({ items: records }));
-  vi.mocked(createTranscriptQuestion).mockImplementation(async (_video, anchor, question, answer) => {
-    const record = { ...existingFavorite, ...anchor, id: 'new-question', question, answer: answer ?? null };
-    records = [record]; favorites = [existingFavorite]; return record;
-  });
-  const client = await renderReadingPage(); await menuAction('提问');
-  await inputDraft('New question'); await inputDraft('New answer', 1);
-  await clickControl('.reader-fixed-editor [type=submit]');
-  await vi.waitFor(() => expect(client.getQueryData<{ items: unknown[] }>(['transcript-marks', 'video-id'])?.items).toHaveLength(1));
-  expect(client.getQueryData<{ items: unknown[] }>(['transcript-questions', 'video-id'])?.items).toHaveLength(1);
-  expect(container.querySelector('.collection-filters')?.textContent).toContain('已有解答（1）');
-  expect(createTranscriptFavorite).not.toHaveBeenCalled();
-  expect(playerHandle.seekTo).not.toHaveBeenCalled(); client.clear();
-});
-
-it('retains independent output options across tabs and resets them on a fresh page without writing data', async () => {
-  vi.mocked(getTranscriptMarks).mockResolvedValue({ items: [existingFavorite] });
-  vi.mocked(getTranscriptQuestions).mockResolvedValue({ items: [{ ...existingFavorite, id: 'q', question: 'Why?', answer: null }] });
-  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
-  let client = await renderReadingPage();
-  const option = (panel: string, text: string) => [...container.querySelectorAll<HTMLLabelElement>(`${panel} label`)]
-    .find(label => label.textContent === text)!.querySelector('input')!;
-  await clickControl('#reading-tab-favorites');
-  await act(async () => { option('.favorites-panel', '包含上下文').click(); option('.favorites-panel', '包含备注').click(); });
-  await clickControl('#reading-tab-questions');
-  expect(option('.questions-panel', '包含上下文').checked).toBe(true);
-  expect(option('.questions-panel', '包含备注').checked).toBe(false);
-  await act(async () => option('.questions-panel', '包含解答').click());
-  await clickControl('#reading-tab-favorites');
-  expect(option('.favorites-panel', '包含上下文').checked).toBe(false);
-  expect(option('.favorites-panel', '包含备注').checked).toBe(true);
-  expect(option('.favorites-panel', '包含解答').checked).toBe(false);
-  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('.favorites-panel button')].find(b => b.textContent === '复制全部收藏')!.click());
-  expect(navigator.clipboard.writeText).toHaveBeenCalled();
-  for (const mutation of [createTranscriptFavorite, createTranscriptQuestion, updateTranscriptQuestion,
-    updateTranscriptMarkNote, deleteTranscriptMark, deleteTranscriptQuestion]) expect(mutation).not.toHaveBeenCalled();
-  await act(async () => root.render(null)); client.clear();
-  client = await renderReadingPage();
-  for (const panel of ['.favorites-panel', '.questions-panel']) {
-    expect(option(panel, '包含上下文').checked).toBe(true);
-    expect(option(panel, '包含备注').checked).toBe(false);
-    expect(option(panel, '包含解答').checked).toBe(false);
-  }
-  client.clear();
-});
-
-it('keeps preview, list and overlay Chinese independent without moving playback or losing note drafts', async () => {
-  vi.mocked(getTranscript).mockResolvedValue({ video_id: 'video-id', revision_id: 'revision-id', origin: 'source_aligned',
-    normalization_version: null, segments: [{ id: 'two', sequence_index: 0, start: 10, end: 12,
-      text: 'Current sentence.', translation_zh: '当前这句话。' }] });
-  vi.mocked(previewSourceLearning).mockResolvedValue(sourcePreview);
-  const client = await renderReadingPage(); await clickControl('.report-time');
-  const listToggle = container.querySelector('.transcript-heading-tools input') as HTMLInputElement;
-  const overlayToggle = container.querySelector('.learning-player-controls input') as HTMLInputElement;
-  expect(listToggle.checked).toBe(false); expect(overlayToggle.checked).toBe(false);
-  await act(async () => listToggle.click());
-  expect(container.querySelector('.segment-translation')?.textContent).toBe('当前这句话。');
-  expect(container.querySelector('.player-subtitle-translation')).toBeNull();
-  await act(async () => overlayToggle.click());
-  expect(container.querySelector('.player-subtitle-translation')?.textContent).toBe('当前这句话。');
-  await enterResult('bilingual result'); await act(async () => byLabel('预览原句与词块').click());
-  await vi.waitFor(() => expect(container.querySelector('.learning-proof')).not.toBeNull());
-  const previewToggle = container.querySelector('.learning-proof input') as HTMLInputElement;
-  expect(previewToggle.checked).toBe(false);
-  await act(async () => previewToggle.click());
-  expect(container.querySelector('.learning-proof')?.textContent).toContain('让我知道最新情况。');
-  await act(async () => previewToggle.click());
-  expect(container.querySelector('.segment-translation')).not.toBeNull();
-  await menuAction('做笔记'); await inputDraft('Unfinished note');
-  await act(async () => { listToggle.click(); overlayToggle.click(); });
-  expect((container.querySelector('.reader-fixed-editor textarea') as HTMLTextAreaElement).value).toBe('Unfinished note');
-  expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.destroyed).not.toHaveBeenCalled();
-  expect(playerHandle.seekTo).not.toHaveBeenCalled(); expect(playerHandle.play).not.toHaveBeenCalled();
-  expect(publishSourceLearning).not.toHaveBeenCalled(); client.clear();
-});
 
 it('keeps translated English anchors exact when saving a favorite and showing chunks', async () => {
   vi.mocked(getTranscript).mockResolvedValue({ video_id: 'video-id', revision_id: 'revision-id', origin: 'source_aligned',
@@ -967,7 +680,68 @@ const episodeFixture = {
   items: [{ id: 'member1', position: 0, video: readyVideo },
     { id: 'member2', position: 1, video: { ...readyVideo, id: 'next', youtube_video_id: 'abcdefghijk', title: 'Next episode' } }],
 };
-it('guards episode navigation, keeps the player while collapsing the directory, clears old reading state on switch', async () => {
+it.each(['removed', 'deleted'])('keeps independent reading for %s collection context', async context => {
+  if (context === 'removed') vi.mocked(getCollection).mockResolvedValue({ ...episodeFixture, items: [] });
+  else vi.mocked(getCollection).mockRejectedValue(new ApiError('missing', 404, 'COLLECTION_NOT_FOUND'));
+  const client = await renderReadingPage('/videos/video-id?collection=course');
+  await vi.waitFor(() => expect(container.textContent).toContain('仍可独立阅读'));
+  expect(container.querySelector('.episode-navigation')).toBeNull();
+  expect(container.querySelector('.transcript-list')).not.toBeNull();
+  expect(playerHandle.mounted).toHaveBeenCalledOnce(); client.clear();
+});
+it('does not choose a collection when opened outside its context', async () => {
+  const client = await renderReadingPage();
+  expect(getCollection).not.toHaveBeenCalled(); expect(container.querySelector('.episode-directory')).toBeNull(); client.clear();
+});
+
+it('keeps complete transcript and favorite exports independent in their own tabs', async () => {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  vi.mocked(getTranscriptMarks).mockResolvedValue({ items: [existingFavorite] });
+  const client = await renderReadingPage();
+  expect([...container.querySelectorAll('[role="tab"]')].map(tab => tab.textContent)).toEqual(['字幕', '收藏']);
+  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('#reading-panel-transcript button')]
+    .find(button => button.textContent === '复制完整字幕')!.click());
+  expect(writeText).toHaveBeenLastCalledWith('Video\n\nEarlier sentence.\n\nCurrent sentence.');
+  await clickControl('#reading-tab-favorites');
+  await act(async () => [...container.querySelectorAll<HTMLButtonElement>('#reading-panel-favorites button')]
+    .find(button => button.textContent === '复制全部收藏')!.click());
+  expect(writeText).toHaveBeenLastCalledWith('Video\n\n1.\n表达：Earlier sentence.\n原句：Earlier sentence.');
+  expect(writeText.mock.lastCall?.[0]).not.toContain('Current sentence.');
+  expect(container.querySelector('#reading-tab-questions')).toBeNull();
+  expect(playerHandle.mounted).toHaveBeenCalledOnce();
+  client.clear();
+});
+
+
+it('keeps preview, list and overlay Chinese independent without moving playback', async () => {
+  vi.mocked(getTranscript).mockResolvedValue({ video_id: 'video-id', revision_id: 'revision-id', origin: 'source_aligned',
+    normalization_version: null, segments: [{ id: 'two', sequence_index: 0, start: 10, end: 12,
+      text: 'Current sentence.', translation_zh: '当前这句话。' }] });
+  vi.mocked(previewSourceLearning).mockResolvedValue(sourcePreview);
+  const client = await renderReadingPage(); await clickControl('.report-time');
+  const listToggle = container.querySelector('.transcript-heading-tools input') as HTMLInputElement;
+  const overlayToggle = container.querySelector('.learning-player-controls input') as HTMLInputElement;
+  expect(listToggle.checked).toBe(false); expect(overlayToggle.checked).toBe(false);
+  await act(async () => listToggle.click());
+  expect(container.querySelector('.segment-translation')?.textContent).toBe('当前这句话。');
+  expect(container.querySelector('.player-subtitle-translation')).toBeNull();
+  await act(async () => overlayToggle.click());
+  expect(container.querySelector('.player-subtitle-translation')?.textContent).toBe('当前这句话。');
+  await enterResult('bilingual result'); await act(async () => byLabel('预览原句与词块').click());
+  await vi.waitFor(() => expect(container.querySelector('.learning-proof')).not.toBeNull());
+  const previewToggle = container.querySelector('.learning-proof input') as HTMLInputElement;
+  expect(previewToggle.checked).toBe(false);
+  await act(async () => previewToggle.click());
+  expect(container.querySelector('.learning-proof')?.textContent).toContain('让我知道最新情况。');
+  await act(async () => previewToggle.click());
+  expect(container.querySelector('.segment-translation')).not.toBeNull();
+  expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.destroyed).not.toHaveBeenCalled();
+  expect(playerHandle.seekTo).not.toHaveBeenCalled(); expect(playerHandle.play).not.toHaveBeenCalled();
+  expect(publishSourceLearning).not.toHaveBeenCalled(); client.clear();
+});
+
+it('keeps the player while collapsing the directory and clears old reading state on episode switch', async () => {
   vi.mocked(getCollection).mockResolvedValue(episodeFixture);
   vi.mocked(getVideo).mockImplementation(async id => id === 'next' ? episodeFixture.items[1].video : readyVideo);
   vi.mocked(getTranscript).mockImplementation(async id => ({ video_id: id, revision_id: id + '-revision', origin: 'generated', normalization_version: 2,
@@ -982,33 +756,27 @@ it('guards episode navigation, keeps the player while collapsing the directory, 
   expect(container.querySelector('.player-subtitle')?.textContent).toBe('Current sentence.');
   await act(async () => { const details = container.querySelector('.episode-directory details') as HTMLDetailsElement; details.open = true; details.open = false; });
   expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.destroyed).not.toHaveBeenCalled();
-  await menuAction('做笔记'); await inputDraft('episode draft');
   await act(async () => buttons()[1].click());
-  expect(container.querySelector('.reader-draft-decision')).not.toBeNull();
-  expect(container.querySelector('h1')?.textContent).toBe('Video');
-  await clickControl('.reader-draft-decision button');
-  expect((container.querySelector('.reader-fixed-editor textarea') as HTMLTextAreaElement).value).toBe('episode draft');
-  await act(async () => buttons()[1].click());
-  await clickControl('.reader-draft-decision button:last-child');
   await vi.waitFor(() => expect(container.querySelector('.transcript-list')?.textContent).toContain('New episode only.'));
   expect(container.querySelector('.transcript-list')?.textContent).not.toContain('Earlier sentence.');
   expect(container.querySelector('.player-subtitle')).toBeNull();
-  expect(container.querySelector('.reader-fixed-editor')).toBeNull();
   expect(buttons()[1].disabled).toBe(true); expect(buttons()[0].disabled).toBe(false);
   expect(playerHandle.destroyed).toHaveBeenCalledOnce(); expect(playerHandle.mounted).toHaveBeenCalledTimes(2);
   expect(playerHandle.play).not.toHaveBeenCalled(); expect(playerHandle.seekTo).not.toHaveBeenCalled();
   client.clear();
 });
-it.each(['removed', 'deleted'])('keeps independent reading for %s collection context', async context => {
-  if (context === 'removed') vi.mocked(getCollection).mockResolvedValue({ ...episodeFixture, items: [] });
-  else vi.mocked(getCollection).mockRejectedValue(new ApiError('missing', 404, 'COLLECTION_NOT_FOUND'));
-  const client = await renderReadingPage('/videos/video-id?collection=course');
-  await vi.waitFor(() => expect(container.textContent).toContain('仍可独立阅读'));
-  expect(container.querySelector('.episode-navigation')).toBeNull();
-  expect(container.querySelector('.transcript-list')).not.toBeNull();
-  expect(playerHandle.mounted).toHaveBeenCalledOnce(); client.clear();
-});
-it('does not choose a collection when opened outside its context', async () => {
-  const client = await renderReadingPage();
-  expect(getCollection).not.toHaveBeenCalled(); expect(container.querySelector('.episode-directory')).toBeNull(); client.clear();
+
+it('suspends following during selection and restores previous automatic mode', async () => {
+  const original = HTMLElement.prototype.scrollTo;
+  const scroll = vi.fn(); HTMLElement.prototype.scrollTo = scroll;
+  try {
+    const client = await renderReadingPage(); await clickControl('.report-time');
+    const before = scroll.mock.calls.length;
+    await clickControl('.segment-mark-whole'); playerHandle.time = 2.5; await clickControl('.report-time');
+    expect(scroll).toHaveBeenCalledTimes(before);
+    await clickControl('.reader-selection-menu [aria-label="关闭选字菜单"]');
+    expect(scroll).toHaveBeenCalledTimes(before + 1);
+    expect(playerHandle.mounted).toHaveBeenCalledOnce(); expect(playerHandle.play).not.toHaveBeenCalled();
+    client.clear();
+  } finally { if (original) HTMLElement.prototype.scrollTo = original; else Reflect.deleteProperty(HTMLElement.prototype, 'scrollTo'); }
 });

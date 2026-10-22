@@ -1,6 +1,6 @@
 # Persistence Model
 
-Scope: current ORM relationships and operation invariants, extracted 2026-10-21. Current schema is the Alembic 014 line; the historical migration chain is still needed to build/upgrade a database. Documenting this model does not perform a schema or data migration.
+Scope: current ORM relationships and operation invariants, updated 2026-10-22. Current schema is the Alembic 015 line; the historical migration chain is still needed to build/upgrade a database. Documenting this model does not perform a schema or data migration.
 
 ## Source Inventory
 
@@ -16,9 +16,8 @@ All tables below are declared in `backend/app/db/models/`. Column lists show loc
 | `transcript_normalization_runs` | video_id, job_id, method, normalization_version, input_unit_count | [TranscriptNormalizationRun](../../../backend/app/db/models/transcript.py) |
 | `transcript_chunk_layouts` | video_id, revision_id, content_sha256 | [TranscriptChunkLayout](../../../backend/app/db/models/transcript_chunk_layout.py) |
 | `transcript_chunk_segments` | layout_id, segment_id, boundary_offsets | [TranscriptChunkSegment](../../../backend/app/db/models/transcript_chunk_layout.py) |
-| `transcript_marks` | video_id, revision_id, segment_id, start_offset, end_offset, selected_text, note | [TranscriptMark](../../../backend/app/db/models/transcript_mark.py) |
+| `transcript_marks` | video_id, revision_id, segment_id, start_offset, end_offset, selected_text | [TranscriptMark](../../../backend/app/db/models/transcript_mark.py) |
 | `transcript_mark_keys` | video_id, revision_id, segment_id, start_offset, end_offset, mark_id | [TranscriptMarkKey](../../../backend/app/db/models/transcript_mark_key.py) |
-| `transcript_questions` | video_id, revision_id, segment_id, start_offset, end_offset, selected_text, question, answer, has_saved_answer | [TranscriptQuestion](../../../backend/app/db/models/transcript_question.py) |
 | `videos` | youtube_video_id, youtube_url, title, channel_title, duration_seconds, thumbnail_url, status, subtitle_source, subtitle_preference, subtitle_language, current_revision_id | [Video](../../../backend/app/db/models/video.py) |
 | `video_collections` | name, description, source_playlist_id, source_playlist_url, version | [VideoCollection](../../../backend/app/db/models/video_collection.py) |
 | `video_collection_items` | collection_id, video_id, position | [VideoCollectionItem](../../../backend/app/db/models/video_collection.py) |
@@ -30,17 +29,17 @@ All tables below are declared in `backend/app/db/models/`. Column lists show loc
 
 ## Identity and Ownership
 
-Video identity is unique youtube_video_id, while local video IDs own media paths and relationships. One video owns multiple jobs/revisions, one preserved Raw source set, and notes; collections reference the same video rather than copying these entities. Raw cues/words are unique on (video_id,sequence_index), words may refer to a cue and have nullable actual times/confidence. Learning segments are unique on (revision_id,sequence_index), not globally by video/sequence.
+Video identity is unique youtube_video_id, while local video IDs own media paths and relationships. One video owns multiple jobs/revisions, one preserved Raw source set, and favorites; collections reference the same video rather than copying these entities. Raw cues/words are unique on (video_id,sequence_index), words may refer to a cue and have nullable actual times/confidence. Learning segments are unique on (revision_id,sequence_index), not globally by video/sequence.
 
 TranscriptRevision permits only generated/source_aligned, unique (video_id,revision_number) with positive numbering. Generated segments use normalization_version=2, source_ref_type=cue, source_refs.cue_ids and the deterministic run relation. Source-aligned segments use normalization_version=NULL (explicit SQL null on insertion), source_ref_type=source_units and source evidence JSON, with no generation run. The segment check constrains version/ref-type combinations; consistency with revision origin/video is additionally enforced by services. Do not claim every cross-row semantic relationship is a DB constraint.
 
-Video.current_revision_id is an indexed nullable string, **not an ORM foreign key**; transcript reads/publication validate that the referenced revision belongs to the video. New publication creates new segment IDs and switches that pointer atomically; old note anchors remain attached to the original revision/segment. Revision deletion is restricted by dependent records; no periodic automatic history cleanup is defined.
+Video.current_revision_id is an indexed nullable string, **not an ORM foreign key**; transcript reads/publication validate that the referenced revision belongs to the video. New publication creates new segment IDs and switches that pointer atomically; old favorite anchors remain attached to the original revision/segment. Revision deletion is restricted by dependent records; no periodic automatic history cleanup is defined.
 
-## Notes and Layouts
+## Favorites and Layouts
 
-Favorite and question anchors store video/revision/segment IDs plus Unicode code-point offsets and exact selected text. The canonical favorite binding key is (video_id,revision_id,segment_id,start_offset,end_offset); mark_id is unique. Historical duplicate mark rows can remain. Deleting the bound mark reassigns to an eligible historical duplicate or removes the binding before deletion; does not delete questions. Questions do not deduplicate by selection. has_saved_answer is a durable one-time event marker, not an exposed answered/mastery status. See [anchor operations](notes-and-anchors.md).
+Favorite anchors store video/revision/segment IDs plus Unicode code-point offsets and exact selected text. The canonical favorite binding key is (video_id,revision_id,segment_id,start_offset,end_offset); mark_id is unique. Historical duplicate mark rows can remain. Deleting the bound mark reassigns to an eligible historical duplicate by creation/id ordering or removes the binding before deletion. Personal notes, questions, answers and first-answer bookkeeping are retired. See [anchor operations](notes-and-anchors.md).
 
-A revision has at most one TranscriptChunkLayout. Per-layout segment association is unique; boundary_offsets is JSON. Deleting a layout cascades its chunk rows; segment and note references use RESTRICT. Layout content_sha256 binds revision and segment IDs plus offsets, rather than English text alone. [Publication](publication.md) owns transaction/identity rules.
+A revision has at most one TranscriptChunkLayout. Per-layout segment association is unique; boundary_offsets is JSON. Deleting a layout cascades its chunk rows; segment and favorite references use RESTRICT. Layout content_sha256 binds revision and segment IDs plus offsets, rather than English text alone. [Publication](publication.md) owns transaction/identity rules.
 
 ## Collections and Retry History
 
@@ -50,6 +49,6 @@ Batch idempotency_key is globally unique in video_import_batches. Retry request 
 
 ## Migration and Verification
 
-`backend/migrations/versions/014_retire_legacy_subtitles.py` removes legacy model-only structures and rejects incompatible rows before altering them. It does not authorize deleting current data. Nonempty collection/retry or answer data may block lossy downgrades; read the relevant migration and test rather than promising reversible data loss.
+`backend/migrations/versions/014_retire_legacy_subtitles.py` removes legacy model-only structures and rejects incompatible rows before altering them. Migration 015 intentionally drops transcript_questions and transcript_marks.note under the approved product change, preserving all favorites/keys and other current rows. Native SQLite DROP COLUMN avoids rebuilding the referenced marks table. Downgrade restores structure only, never deleted content; use a consistent pre-upgrade backup for content recovery. Historical 001–014 definitions remain necessary for fresh builds and migration tests. Nonempty collection/retry data may block earlier lossy downgrades; inspect the relevant migration before claiming reversibility.
 
 Evidence: `backend/tests/test_database.py`, `test_retired_subtitle_migration.py`, `test_source_learning_api.py` and `test_video_api.py`; [database engineering](../backend/database-guidelines.md) owns isolation/backup practice. Current business tables contain no Chapter/StudySet/LearningItem/AIAnswer/PracticeAttempt schema.

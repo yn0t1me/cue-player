@@ -1,11 +1,11 @@
 # Context English
 
-A personal learning space for understanding real YouTube content and saving expressions in context. The vocabulary below describes the current product; planned learning-set and practice concepts are outside this glossary.
+A local YouTube player and material collection tool for learning in an external Agent. The vocabulary below describes the current product; planned learning-set and practice concepts are outside this glossary.
 
 ## Language
 
 **Video（视频）**:
-A saved YouTube learning source, shared by its reading subtitles, saved expressions and questions even when it belongs to several collections.
+A saved YouTube learning source, shared by its reading subtitles, saved expressions even when it belongs to several collections.
 
 **Subtitle Preference（字幕偏好）**:
 The user's choice of manual-first or automatic English subtitles for a newly imported video. It is distinct from the subtitle source actually obtained.
@@ -24,7 +24,7 @@ The timed English text used for reading and sentence replay, initially generated
 One retained edition of a video's learning subtitles, with its own sentences and associated reading metadata.
 
 **Current Revision（当前字幕版本）**:
-The edition selected for the main reading list and subtitle overlay. Another retained edition may still provide the original context of older notes.
+The edition selected for the main reading list and subtitle overlay. Another retained edition may still provide the original context of older favorites.
 
 **Segment（字幕条目）**:
 One timed unit of learning subtitles. A preserved manual-caption unit need not be a complete linguistic sentence.
@@ -40,18 +40,8 @@ The optional saved Chinese rendering of a learning-subtitle entry, shared by its
 A continuous span of English text within one subtitle entry and edition, or the whole entry. Equal words at different positions are distinct selections.
 
 **Favorite（收藏）**:
-A saved selection considered worth keeping, optionally accompanied by a personal note. “字幕标记” is the older name for this same saved-expression concept.
+A saved English selection with its original subtitle-entry context, exportable for learning in an external Agent. “字幕标记” is the older name for this same saved-expression concept.
 _Avoid_: Automatically generated learning item
-
-**Note（备注／个人笔记）**:
-The optional personal text attached to a favorite, separate from a question and its answer.
-
-**Question（提问）**:
-A user-written question about a selection, which can exist independently of a favorite and may later receive a saved answer.
-
-**Answer（解答）**:
-Text the user saves for a question, typed personally or brought back from an external AI conversation. Its presence does not establish correctness or mastery.
-_Avoid_: Automatic in-app AI answer, completed learning
 
 **Collection（视频合集）**:
 A persistent ordered grouping of videos for viewing. Removing a member or the collection leaves those videos and their learning material intact.

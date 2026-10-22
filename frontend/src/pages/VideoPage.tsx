@@ -3,12 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   createTranscriptFavorite,
-  createTranscriptQuestion,
-  updateTranscriptQuestion,
   deleteTranscriptMark,
-  deleteTranscriptQuestion,
-  updateTranscriptMarkNote,
-  getTranscriptQuestions,
   getChunkLayout,
   getTranscript,
   getTranscriptMarks,
@@ -23,8 +18,9 @@ import LearningPlayer from '../features/video/LearningPlayer';
 import { findActiveSegmentIndex } from '../features/transcript/findActiveSegmentIndex';
 import { hasCurrentChunkLayout, type ReadingMode } from '../features/transcript/TranscriptViewSwitch';
 import ReadingNotesWorkspace, { type ReadingTab } from '../features/transcript/ReadingNotesWorkspace';
-import { useReaderNotes } from '../features/transcript/ReaderNotesControls';
+import { useReaderFavorites } from '../features/transcript/ReaderNotesControls';
 import ReaderCollectionPanel from '../features/transcript/ReaderCollectionPanel';
+import TranscriptExportPanel from '../features/transcript/TranscriptExportPanel';
 import EpisodeDirectory from '../features/collections/EpisodeDirectory';
 import type { TranscriptSegment } from '../types/video';
 
@@ -88,11 +84,6 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
     queryFn: ({ signal }) => getTranscriptMarks(id, signal),
     enabled: video?.status === 'ready',
   });
-  const questions = useQuery({
-    queryKey: ['transcript-questions', id],
-    queryFn: ({ signal }) => getTranscriptQuestions(id, signal),
-    enabled: video?.status === 'ready',
-  });
   const chunkLayout = useQuery({
     queryKey: ['chunk-layout', id, transcript.data?.revision_id],
     queryFn: ({ signal }) => getChunkLayout(id, signal),
@@ -122,32 +113,16 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
   const reportTime = (seconds: number) => { setCurrentTime(seconds); setHasPlayerTime(true); };
   const reportReady = (ready: boolean) => { setPlayerReady(ready); setHasPlayerTime(false); };
   const refreshMarks = () => queryClient.invalidateQueries({ queryKey: ['transcript-marks', id] });
-  const refreshNotes = () => Promise.all([
-    refreshMarks(), queryClient.invalidateQueries({ queryKey: ['transcript-questions', id] }),
-  ]);
-  const removeQuestion = async (questionId: string) => {
-    await deleteTranscriptQuestion(id, questionId); await refreshNotes();
-  };
-  const notes = useReaderNotes({
-    marks: marks.data?.items ?? [],
-    createFavorite: async anchor => { const result = await createTranscriptFavorite(id, anchor); await refreshNotes(); return result; },
-    updateNote: async (markId, note) => { await updateTranscriptMarkNote(id, markId, note); await refreshNotes(); },
-    deleteFavorite: async markId => { await deleteTranscriptMark(id, markId); await refreshNotes(); },
-    createQuestion: async (anchor, question, answer) => {
-      await createTranscriptQuestion(id, anchor, question, answer);
-      await refreshNotes();
-    },
-    updateQuestion: async (questionId, patch) => {
-      await updateTranscriptQuestion(id, questionId, patch);
-      await refreshNotes();
-    },
-    onConflict: () => { void queryClient.invalidateQueries({ queryKey: ['transcript', id] }); void refreshNotes(); },
+  const favorites = useReaderFavorites({
+    createFavorite: async anchor => { const result = await createTranscriptFavorite(id, anchor); await refreshMarks(); return result; },
+    deleteFavorite: async markId => { await deleteTranscriptMark(id, markId); await refreshMarks(); },
+    onConflict: () => { void queryClient.invalidateQueries({ queryKey: ['transcript', id] }); void refreshMarks(); },
   });
   return (
     <div className={video?.status === 'ready' ? 'video-reading-page' : 'video-detail-page'}>
       <div className="video-page-topline"><Link className="back-link" to="/" onClick={event => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        event.preventDefault(); notes.guard(() => navigate('/'));
+        event.preventDefault(); favorites.guard(() => navigate('/'));
       }}>← 返回视频库</Link>
         {video?.status === 'ready' && <a href="#subtitle-tools" onClick={() => {
           const tools = document.getElementById('subtitle-tools');
@@ -157,7 +132,7 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
       {query.isError && <div className="error-panel" role="alert"><h1 className="detail-title">暂时无法打开视频</h1><p>{query.error.message}</p>
         <button disabled={query.isFetching} onClick={() => void query.refetch()}>重新加载</button></div>}
       {video && <>
-        {collectionId && <EpisodeDirectory collectionId={collectionId} videoId={id} guard={notes.guard} navigate={navigate} />}
+        {collectionId && <EpisodeDirectory collectionId={collectionId} videoId={id} guard={favorites.guard} navigate={navigate} />}
         {location.state?.alreadyExists && <p className="notice" role="status">这个视频已在视频库中，已打开原记录；沿用已保存来源，本次选择不会更换字幕。</p>}
         <div className={`detail-summary${video.status === 'ready' ? ' is-reading' : ''}`}>
           {video.status !== 'ready' && video.thumbnail_url && <img className="detail-thumbnail" src={video.thumbnail_url} alt="" />}
@@ -187,12 +162,12 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
                 onReadyChange={reportReady} ref={playerRef} />
             </LearningPlayer>
             <button type="button" className="transcript-list-toggle" aria-expanded={listVisible}
-              aria-controls="reading-transcript-column" onClick={() => notes.guard(() => setListVisible(value => !value))}>
-              {listVisible ? '收起学习面板' : '展开学习面板'} <span aria-hidden="true">{listVisible ? '→' : '←'}</span>
+              aria-controls="reading-transcript-column" onClick={() => favorites.guard(() => setListVisible(value => !value))}>
+              {listVisible ? '收起字幕面板' : '展开字幕面板'} <span aria-hidden="true">{listVisible ? '→' : '←'}</span>
             </button>
           </div>
           <div id="reading-transcript-column" className="reading-transcript-column" hidden={!listVisible}>
-            <ReadingNotesWorkspace activeTab={activeTab} onTabChange={tab => tab === activeTab || notes.guard(() => {
+            <ReadingNotesWorkspace activeTab={activeTab} onTabChange={tab => tab === activeTab || favorites.guard(() => {
               setActiveTab(tab);
               window.requestAnimationFrame(() => document.getElementById(`reading-tab-${tab}`)?.focus({ preventScroll: true }));
             })}
@@ -202,6 +177,11 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
                   <p>{transcript.error.message}</p>
                   <button disabled={transcript.isFetching} onClick={() => void transcript.refetch()}>重新加载字幕</button>
                 </div>}
+                {transcript.data && <TranscriptExportPanel key={`export-${transcript.data.revision_id}`}
+                  transcript={transcript.data} videoTitle={video.title ?? `YouTube · ${video.youtube_video_id}`}
+                  layout={chunkLayout.data?.layout} loading={transcript.isFetching || chunkLayout.isFetching}
+                  error={chunkLayout.isError ? chunkLayout.error.message : transcript.isError ? transcript.error.message : null}
+                  onRetry={() => { void transcript.refetch(); void chunkLayout.refetch(); }} />}
                 {transcript.data && <TranscriptPanel key={transcript.data.revision_id}
                   transcript={transcript.data} currentTime={currentTime}
                   showTranslation={showTranslation} onTranslationChange={setShowTranslation}
@@ -211,35 +191,17 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
                   chunkLayout={chunkLayout.data?.layout}
                   chunkLayoutLoading={chunkLayout.isPending}
                   onOpenChunkTools={openChunkTools}
-                  onSelect={notes.openSelection} onSelectionError={notes.invalidSelection} followSuspended={notes.suspended} />}
+                  onSelect={favorites.openSelection} onSelectionError={favorites.invalidSelection} followSuspended={favorites.suspended} />}
               </>}
               favorites={<div className="reading-collection-scroll">
-                <ReaderCollectionPanel kind="favorites" items={marks.data?.items ?? []}
+                <ReaderCollectionPanel items={marks.data?.items ?? []}
                   videoTitle={video.title ?? `YouTube · ${video.youtube_video_id}`}
                   loading={marks.isPending} loadError={marks.isError ? marks.error.message : null}
                   onRetry={() => { void marks.refetch(); }} onReplay={playAt}
-                  onEditNote={notes.editNote} editingDisabled={notes.suspended}
-                  relatedQuestions={questions.data?.items ?? []} relatedLoading={questions.isPending}
-                  relatedError={questions.isError ? questions.error.message : null}
-                  onRetryRelated={() => { void questions.refetch(); }}
-                  onEditQuestion={notes.editQuestion}
-                  onEditAnswer={(record, source) => notes.editQuestion(record, source, true)}
-                  onDeleteQuestion={removeQuestion}
-                  onDelete={async markId => { await deleteTranscriptMark(id, markId); await refreshNotes(); }} />
-              </div>}
-              questions={<div className="reading-collection-scroll">
-                <ReaderCollectionPanel kind="questions" items={questions.data?.items ?? []}
-                  relatedMarks={marks.data?.items ?? []} relatedLoading={marks.isPending}
-                  relatedError={marks.isError ? marks.error.message : null}
-                  onRetryRelated={() => { void marks.refetch(); }}
-                  videoTitle={video.title ?? `YouTube · ${video.youtube_video_id}`}
-                  loading={questions.isPending} loadError={questions.isError ? questions.error.message : null}
-                  onRetry={() => { void questions.refetch(); }} onReplay={playAt}
-                  onEditQuestion={notes.editQuestion}
-                  onEditAnswer={(record, source) => notes.editQuestion(record, source, true)}
-                  editingDisabled={notes.suspended} onDelete={removeQuestion} />
+                  editingDisabled={favorites.suspended}
+                  onDelete={async markId => { await deleteTranscriptMark(id, markId); await refreshMarks(); }} />
               </div>} />
-            {notes.controls}
+            {favorites.controls}
           </div>
         </div>}
         {video.status === 'ready' && <details className="subtitle-tools" id="subtitle-tools">
@@ -255,7 +217,7 @@ function VideoPageContent({ id, initialTab }: { id: string; initialTab: ReadingT
               queryClient.setQueryData(
                 ['chunk-layout', id, result.transcript.revision_id], result.chunk_layout);
               void queryClient.invalidateQueries({ queryKey: ['transcript-revisions', id] });
-              void refreshNotes();
+              void refreshMarks();
             }} />}
         </details>}
         <a className="text-link" href={video.youtube_url} target="_blank" rel="noreferrer">在 YouTube 打开原视频 ↗</a>

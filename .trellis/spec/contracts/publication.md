@@ -19,8 +19,8 @@ Otherwise current revision must equal expected_revision_id or reject 409 TRANSCR
 
 ## Evidence Retention
 
-Per-segment source_refs contains extractor_version,source_digest,first/last_unit_id,units,start_basis,end_basis,result_format,source_type,processing_mode. Units retain original cue ID or file hash, cue/line/token/character position, start/end basis and optional end_cue_sequence_index; no fake UUID is substituted for a file locator. Original Raw and note anchors are untouched. Current reads do not expose internal source_refs.
+Per-segment source_refs contains extractor_version,source_digest,first/last_unit_id,units,start_basis,end_basis,result_format,source_type,processing_mode. Units retain original cue ID or file hash, cue/line/token/character position, start/end basis and optional end_cue_sequence_index; no fake UUID is substituted for a file locator. Original Raw and favorite anchors are untouched. Current reads do not expose internal source_refs.
 
 Layout GET is readonly; a separate layout-write API does not exist. Historical revision reads do not change the current pointer. English learning SRT exports only current English/times; Raw SRT comes from original cues through its export rules, not this publication.
 
-Evidence: `backend/tests/test_source_learning_api.py` covers stage-by-stage rollback, concurrent identical/different confirmation, translation-only changes, evidence mismatch and readonly preview; `backend/tests/test_video_api.py` covers old notes and publication concurrency. These are code/test-source facts, not rerun verification or a universal quality guarantee.
+Evidence: `backend/tests/test_source_learning_api.py` covers stage-by-stage rollback, concurrent identical/different confirmation, translation-only changes, evidence mismatch and readonly preview; `backend/tests/test_video_api.py` covers historical favorites and publication concurrency. These are code/test-source facts, not rerun verification or a universal quality guarantee.

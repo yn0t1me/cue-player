@@ -22,7 +22,6 @@ def register_error_handlers(app: FastAPI) -> None:
                    else '请检查合集或批量导入请求字段。' if any(
             part in request.url.path for part in ('/collections', '/video-import-'))
                    else '请检查学习字幕请求字段。' if '/source-learning' in request.url.path
-                   else '请检查字幕提问字段。' if '/questions' in request.url.path
                    else '请检查字幕标记字段。' if '/marks' in request.url.path
                    else '请提交有效的 YouTube 链接。')
         return JSONResponse(status_code=422, content={

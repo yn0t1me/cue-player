@@ -2,7 +2,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { useReaderNotes } from './ReaderNotesControls';
+import { useReaderFavorites } from './ReaderNotesControls';
 import type { TranscriptMark } from '../../types/video';
 
 let root: Root;
@@ -10,8 +10,8 @@ let container: HTMLDivElement;
 const item = { id: 'new-favorite' } as TranscriptMark;
 const deleteFavorite = vi.fn();
 function Harness() {
-  const notes = useReaderNotes({ marks: [], createFavorite: async () => ({ item, created: true }),
-    updateNote: vi.fn(), deleteFavorite, createQuestion: vi.fn(), updateQuestion: vi.fn(), onConflict: vi.fn() });
+  const notes = useReaderFavorites({ createFavorite: async () => ({ item, created: true }),
+    deleteFavorite, onConflict: vi.fn() });
   return <><button onClick={event => notes.openSelection({ anchor: { revision_id: 'revision',
     segment_id: 'segment', start_offset: 0, end_offset: 4, selected_text: 'word' },
     trigger: event.currentTarget, rect: event.currentTarget.getBoundingClientRect(), keyboard: false })}>选择</button>{notes.controls}</>;
