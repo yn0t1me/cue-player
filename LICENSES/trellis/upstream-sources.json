@@ -1,0 +1,28 @@
+{
+  "project": "Trellis",
+  "version": "0.6.17",
+  "commit": "833a5846d18ad7a5ccd8c41c876d89cc936f5fd9",
+  "retrieved": "2026-10-21",
+  "sources": {
+    "LICENSE": {
+      "url": "https://raw.githubusercontent.com/mindfold-ai/Trellis/833a5846d18ad7a5ccd8c41c876d89cc936f5fd9/LICENSE",
+      "sha256": "d8a6cc31abc16b6748c7a21f21611f5a1ec33f67d22ca23d7da1c19b95496bee",
+      "bytes": 34020
+    },
+    "COPYRIGHT": {
+      "url": "https://raw.githubusercontent.com/mindfold-ai/Trellis/833a5846d18ad7a5ccd8c41c876d89cc936f5fd9/COPYRIGHT",
+      "sha256": "c9640ad1fcdc27ffa127974f796489c61ed475de10c9b47d3e644aced219ca15",
+      "bytes": 734
+    },
+    "packages/cli/src/templates/trellis/gitignore.txt": {
+      "url": "https://raw.githubusercontent.com/mindfold-ai/Trellis/833a5846d18ad7a5ccd8c41c876d89cc936f5fd9/packages/cli/src/templates/trellis/gitignore.txt",
+      "sha256": "3bc42434cbe61c937a1c26ea3c880b496bfad4e7d683750169e27ade509aa798",
+      "bytes": 461
+    },
+    "packages/cli/src/templates/markdown/agents.md": {
+      "url": "https://raw.githubusercontent.com/mindfold-ai/Trellis/833a5846d18ad7a5ccd8c41c876d89cc936f5fd9/packages/cli/src/templates/markdown/agents.md",
+      "sha256": "6cacfe99748b435d0660c2463c697bc323d53798aecf3492283ca8eac1b29682",
+      "bytes": 1073
+    }
+  }
+}
