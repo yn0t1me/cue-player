@@ -42,3 +42,40 @@ Activated the selected public code snapshot as the sole development checkout; in
 ### Next Steps
 
 - Continue new work through public Trellis tasks and curated journals; remote publication remains separate.
+
+
+## Session 2: 播放器与 Agent 材料导出产品重构
+<!-- trellis-session: v=2 fp=4344fe81de6468dc -->
+
+**Date**: 2026-10-22
+**Task**: 播放器与 Agent 材料导出产品重构
+**Branch**: `codex/player-agent-export`
+
+### Summary
+
+产品收敛为播放、收藏及独立材料导出；移除备注问答并完成数据库升级，保留原有视频、字幕和收藏。
+
+### Main Changes
+
+- 字幕与收藏两个标签页分别提供复制和 Markdown 下载；保留中文词块、加工导回、SRT、导入与合集。
+- 015 迁移移除备注与问题答案，实际升级后所有非退役数据指纹一致，87 条收藏和绑定保留。
+- 任务已归档至 .trellis/tasks/archive/2026-10/10-22-player-agent-export，规范与 README 已同步。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `184ceda` | feat: focus player on agent material exports |
+
+### Testing
+
+- [OK] 后端 475 tests passed；前端 152 tests passed，tsc + Vite build passed；独立复查和文档链接检查通过。
+- [OK] 隔离及实际数据库迁移、外键和完整性核对通过；Chrome 实际复制、下载、双语词块及英文直接输出通过。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 真实 YouTube 重复加载稳定性、原生控件、全屏及主观回听边界仍有未验收范围，未宣称本次修复。
