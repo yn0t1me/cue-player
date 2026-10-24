@@ -8,9 +8,9 @@
 - [x] 前端 npm test / npm run build；后端相应健康/应用启动与名称断言；无数据库迁移。
 - [x] 按 trellis-check 独立检查全范围变更，记录实际结果。
 - [x] 检查将发布的 main 历史和文件，许可证/第三方声明保留，密钥及运行产物不得进入发布。
-- [ ] 展示具体提交清单，用户确认后执行工作提交；发布核对后归档并记录会话，追加推送整理记录。
-- [ ] 按本会话已经授权的发布请求创建 public 仓库 yn0t1me/cue-player，配置 origin/upstream，推送经检查的 main。
-- [ ] 核对远程 public/default branch/main SHA 与本地一致，记录发布结果；不更改旧私有仓库。
-- [ ] 返回公开仓库链接，说明实际验证与剩余限制。
+- [x] 具体清单已获确认，工作提交 f38a33d 已完成；发布核对后交由 Trellis 归档和日志流程追加整理记录。
+- [x] 按本会话已经授权的发布请求创建 public 仓库 yn0t1me/cue-player，配置 origin/upstream，推送经检查的 main。
+- [x] 核对远程 public/default branch/main SHA 与本地一致，记录发布结果；不更改旧私有仓库。
+- [x] 已向用户提供公开仓库链接；验证与限制记录在 validation.md，最终回复再次提供结果。
 
 不运行全历史重写、force push、--mirror 或删除旧仓库。名称更改不会改变当前运行数据，旧浏览器导出文件不做重命名迁移。
