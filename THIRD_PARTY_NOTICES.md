@@ -1,6 +1,6 @@
 # 第三方材料与许可证
 
-Context English 的原创部分使用根 [MIT License](LICENSE)。本文件列出的第三方材料保留其原有版权和许可，不因根许可证而重新授权为 MIT。
+Cue Player 的原创部分使用根 [MIT License](LICENSE)。本文件列出的第三方材料保留其原有版权和许可，不因根许可证而重新授权为 MIT。
 
 ## Trellis 开发工具
 

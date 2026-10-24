@@ -71,7 +71,7 @@ def create_app(settings: Settings | None = None,
             await scheduler.stop()
             engine.dispose()
 
-    app = FastAPI(title="Context English", lifespan=lifespan)
+    app = FastAPI(title="Cue Player", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_origins,

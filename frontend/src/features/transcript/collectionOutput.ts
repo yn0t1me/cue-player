@@ -46,7 +46,7 @@ export function downloadCollection(content: string, kind: 'favorites' | 'transcr
   const url = URL.createObjectURL(new Blob([content], { type: 'text/markdown;charset=utf-8' }));
   const link = document.createElement('a');
   try {
-    link.href = url; link.download = `context-english-${safeTitle}-${kind}.md`;
+    link.href = url; link.download = `cue-player-${safeTitle}-${kind}.md`;
     document.body.append(link); link.click();
   } finally { link.remove(); URL.revokeObjectURL(url); }
 }

@@ -4,7 +4,7 @@ Updated: 2026-10-22. Scope is a capability baseline, not a second task tracker o
 
 ## Goal and Current Scope
 
-Context English is a local YouTube player and material collection tool. Users first watch and export the complete transcript to an external Agent for explanation, then watch again and export favorited expressions with their subtitle entries for focused learning. Teaching and learning interaction live in the Agent; the app does not track or enforce learning stages.
+Cue Player is a local YouTube player and material collection tool. Users first watch and export the complete transcript to an external Agent for explanation, then watch again and export favorited expressions with their subtitle entries for focused learning. Teaching and learning interaction live in the Agent; the app does not track or enforce learning stages.
 
 Current capabilities: single/multiple/playlist import, manual-first or automatic preference with eligible local-STT fallback, local initial English subtitles, source-based external manual/automatic processing with Chinese and chunks, user-confirmed publication, sentence replay/following, overlay/fullscreen, expression favorites and separate complete-transcript/expression copy and Markdown output, ordered collections, batch progress and explicit eligible failed-import retry.
 

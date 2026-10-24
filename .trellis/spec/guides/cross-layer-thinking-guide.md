@@ -1,6 +1,6 @@
 # Cross-Layer Change Guide
 
-Applies to Context English changes spanning storage, services, API and React. This project-owned guide replaces Trellis upstream CLI/channel examples; it does not require editing the Trellis runtime.
+Applies to Cue Player changes spanning storage, services, API and React. This project-owned guide replaces Trellis upstream CLI/channel examples; it does not require editing the Trellis runtime.
 
 ## Trace the Real Operation
 

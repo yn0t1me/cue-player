@@ -1,4 +1,4 @@
-# Context English
+# Cue Player
 
 面向外部 Agent 学习的 YouTube 播放器与素材采集工具。观看、回听并收藏表达，将完整字幕或收藏表达分别导出给 Agent。
 

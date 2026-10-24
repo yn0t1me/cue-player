@@ -1,6 +1,6 @@
 # Expression Favorites and Agent Materials
 
-Status: product contract, updated 2026-10-22. Context English supplies viewing and material collection; the user performs learning in an external Agent.
+Status: product contract, updated 2026-10-22. Cue Player supplies viewing and material collection; the user performs learning in an external Agent.
 
 ## Learning Workflow
 

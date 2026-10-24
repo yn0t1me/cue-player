@@ -32,9 +32,11 @@ it('selects translation and chunks independently of English and downloads the sa
   const createObjectURL = vi.fn((_blob: Blob) => 'blob:test'); const revokeObjectURL = vi.fn();
   Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
-  const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  let filename = '';
+  const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { filename = this.download; });
   await click('导出字幕 Markdown');
   const blob = createObjectURL.mock.calls[0]?.[0];
+  expect(filename).toBe('cue-player-Video-transcript.md');
   expect(blob).toBeInstanceOf(Blob); expect(anchorClick).toHaveBeenCalledOnce();
   expect(revokeObjectURL).toHaveBeenCalledWith('blob:test'); expect(document.querySelector('a[download]')).toBeNull();
   const read = new FileReader(); const content = await new Promise<string>(resolve => { read.onload = () => resolve(String(read.result)); read.readAsText(blob!); });

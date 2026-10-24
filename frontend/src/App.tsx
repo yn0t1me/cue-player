@@ -7,7 +7,7 @@ import ImportBatchPage from './pages/ImportBatchPage';
 export default function App() {
   return (
     <div className="app-shell">
-      <header><Link className="wordmark" to="/">Context English<span aria-hidden="true">.</span></Link>
+      <header><Link className="wordmark" to="/">Cue Player<span aria-hidden="true">.</span></Link>
         <span className="edition">视频播放 · 表达收藏</span></header>
       <main><Routes>
         <Route path="/" element={<LibraryPage />} />

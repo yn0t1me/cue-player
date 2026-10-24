@@ -38,6 +38,7 @@ it('identifies the player and expression collector and explains the complete sou
   ));
 
   await vi.waitFor(() => expect(container.textContent).toContain('从一个想看懂的视频开始'));
+  expect(container.querySelector('.wordmark')?.textContent).toBe('Cue Player.');
   expect(container.querySelector('.edition')?.textContent).toBe('视频播放 · 表达收藏');
   expect(container.querySelector('#import-hint')?.textContent).toContain('都没有时在本机进行语音转写');
   queryClient.clear();
