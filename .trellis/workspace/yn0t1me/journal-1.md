@@ -79,3 +79,40 @@ Activated the selected public code snapshot as the sole development checkout; in
 ### Next Steps
 
 - 真实 YouTube 重复加载稳定性、原生控件、全屏及主观回听边界仍有未验收范围，未宣称本次修复。
+
+
+## Session 3: Cue Player 更名与开源发布
+<!-- trellis-session: v=2 fp=c13b1771010f037f -->
+
+**Date**: 2026-10-24
+**Task**: Cue Player 更名与开源发布
+**Branch**: `main`
+
+### Summary
+
+产品统一为 Cue Player，并创建公开仓库 https://github.com/yn0t1me/cue-player，首次 main 推送及可见性核对通过。
+
+### Main Changes
+
+- 更新页面、HTML、OpenAPI、下载前缀、项目元数据与当前规范；第三方依赖、许可正文、历史资料与运行数据保持原状。
+- 创建 yn0t1me/cue-player 公开仓库，配置 origin 和 main 上游；原 context-english 仓库仍为私有。
+- 任务归档于 .trellis/tasks/archive/2026-10/10-24-cue-player-public-release。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f38a33d` | chore: rename project to Cue Player |
+
+### Testing
+
+- [OK] 前端152项测试和构建、后端健康及OpenAPI名称检查通过，锁文件除根名称外精确一致；独立复查通过。
+- [OK] 首次推送前扫描main六个提交393个blob，无实际凭证或运行数据；唯一命中为测试占位URL。GitHub public/main及首次远程SHA与本地一致。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 未进行新的真实YouTube稳定播放、教学质量或外部安全审计验收；保留既有证据限制。
